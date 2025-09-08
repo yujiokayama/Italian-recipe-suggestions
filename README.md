@@ -1,159 +1,155 @@
-# Italian Recipe Suggestions
+# イタリア料理レシピ提案システム
 
-AI-powered Italian recipe suggestion application with ingredient-based recipe generation and variations.
+食材ベースのレシピ生成とバリエーション提案機能を持つAI搭載イタリア料理レシピ提案アプリケーション。
 
-## Project Overview
+## アーキテクチャ
 
-This project consists of an AI agent that generates Italian recipes based on user-provided ingredients and suggests recipe variations. The application is built using VoltAgent for AI capabilities and will be extended with a Next.js frontend.
+- **AIエージェント**: VoltAgent搭載レシピ生成（`/agent`内に配置）
+- **フロントエンド**: Next.js 14 with React 18（計画中）
+- **バックエンド**: Next.js API Routes（計画中）
+- **データベース**: Supabase PostgreSQL（計画中）
+- **認証**: Supabase Auth（計画中）
+- **デプロイ**: Vercel（計画中）
 
-## Architecture
+## 現在の実装状況
 
-- **AI Agent**: VoltAgent-powered recipe generation (located in `/agent`)
-- **Frontend**: Next.js 14 with React 18 (planned)
-- **Backend**: Next.js API Routes (planned)
-- **Database**: Supabase PostgreSQL (planned)
-- **Authentication**: Supabase Auth (planned)
-- **Deployment**: Vercel (planned)
+### ✅ 完了
+- VoltAgent AIエージェントセットアップ
+- プロジェクト構造とドキュメント
+- 開発環境設定
 
-## Current Implementation Status
+### 🚧 進行中
+- レシピ生成ツールとワークフロー
 
-### ✅ Completed
-- VoltAgent AI agent setup
-- Project structure and documentation
-- Development environment configuration
+### 📋 計画中
+- Next.jsフロントエンドアプリケーション
+- Supabaseデータベース統合
+- ユーザー認証
+- レシピ管理機能
+- Vercelへのデプロイ
 
-### 🚧 In Progress
-- Recipe generation tools and workflows
+## クイックスタート
 
-### 📋 Planned
-- Next.js frontend application
-- Supabase database integration
-- User authentication
-- Recipe management features
-- Deployment to Vercel
-
-## Quick Start
-
-### Prerequisites
+### 前提条件
 
 - Node.js 20+
 - npm
 - OpenAI API Key
 
-### Setup
+### セットアップ
 
-1. Clone the repository:
+1. リポジトリをクローン:
    ```bash
    git clone <repository-url>
    cd Italian-recipe-suggestions
    ```
 
-2. Install dependencies:
+2. 依存関係をインストール:
    ```bash
    cd agent
    npm install
    ```
 
-3. Configure environment variables:
+3. 環境変数を設定:
    ```bash
    cd agent
    cp .env.example .env
-   # Edit .env with your OpenAI API key
+   # .envファイルをOpenAI APIキーで編集
    ```
 
-4. Run the development server:
+4. 開発サーバーを起動:
    ```bash
    npm run dev
    ```
 
-## Project Structure
+## プロジェクト構造
 
 ```
 Italian-recipe-suggestions/
-├── README.md                   # This file
-├── PROMPT_TEMPLATE.md          # Project specifications and design
-├── .gitignore                  # Git ignore rules
-├── agent/                      # VoltAgent AI implementation
+├── README.md                   # このファイル
+├── PROMPT_TEMPLATE.md          # プロジェクト仕様と設計
+├── .gitignore                  # Git無視ルール
+├── agent/                      # VoltAgent AI実装
 │   ├── src/
-│   │   ├── index.ts           # Main entry point
-│   │   ├── tools/             # Custom tools
-│   │   └── workflows/         # Workflow definitions
-│   ├── package.json           # Dependencies and scripts
-│   ├── tsconfig.json          # TypeScript configuration
-│   └── README.md              # Agent-specific documentation
-└── .serena/                   # Serena project configuration
-    └── project.yml            # Project settings
+│   │   ├── index.ts           # メインエントリーポイント
+│   │   ├── tools/             # カスタムツール
+│   │   └── workflows/         # ワークフロー定義
+│   ├── package.json           # 依存関係とスクリプト
+│   ├── tsconfig.json          # TypeScript設定
+│   └── README.md              # エージェント固有のドキュメント
+└── .serena/                   # Serenaプロジェクト設定
+    └── project.yml            # プロジェクト設定
 ```
 
-## Development Commands
+## 開発コマンド
 
-### Agent Development
+### エージェント開発
 ```bash
 cd agent
 
-# Development mode with hot reload
+# ホットリロード付き開発モード
 npm run dev
 
-# Build for production
+# 本番用ビルド
 npm run build
 
-# Run production build
+# 本番ビルドを実行
 npm start
 
-# Type checking
+# 型チェック
 npm run typecheck
 
-# Linting
+# リンティング
 npm run lint
 npm run lint:fix
 ```
 
-## Tech Stack
+## 技術スタック
 
-### Current Implementation
-- **VoltAgent**: AI agent framework
-- **TypeScript**: Type-safe JavaScript
-- **OpenAI GPT-4o-mini**: Language model
-- **Biome**: Linting and formatting
-- **Zod**: Schema validation
+### 現在の実装
+- **VoltAgent**: AIエージェントフレームワーク
+- **TypeScript**: 型安全なJavaScript
+- **OpenAI GPT-4o-mini**: 言語モデル
+- **Biome**: リンティングとフォーマット
+- **Zod**: スキーマ検証
 
-### Planned Additions
-- **Next.js 14**: React framework with App Router
-- **Tailwind CSS**: Utility-first CSS framework
-- **Zustand**: State management
-- **React Hook Form + Zod**: Form handling
-- **Supabase**: Database, authentication, and storage
-- **Vercel**: Deployment platform
+### 追加予定
+- **Next.js 14**: App Routerを使用したReactフレームワーク
+- **Tailwind CSS**: ユーティリティファーストCSSフレームワーク
+- **Zustand**: 状態管理
+- **React Hook Form + Zod**: フォーム処理
+- **Supabase**: データベース、認証、ストレージ
+- **Vercel**: デプロイプラットフォーム
 
-## Features
+## 機能
 
-### Core Features (Planned)
-- 🍝 Italian recipe generation based on ingredients
-- 🔄 Recipe variations and alternatives
-- 👤 User authentication and profiles
-- ❤️ Favorite recipes management
-- 📱 Responsive web interface
-- 🔍 Recipe search and filtering
+### コア機能（計画中）
+- 🍝 食材ベースのイタリア料理レシピ生成
+- 🔄 レシピのバリエーションと代替案
+- 👤 ユーザー認証とプロフィール
+- ❤️ お気に入りレシピ管理
+- 📱 レスポンシブWebインターフェース
+- 🔍 レシピ検索とフィルタリング
 
-### AI Agent Features (Current)
-- Ingredient-based recipe generation
-- Recipe variation suggestions
-- Cooking tips and instructions
-- Difficulty level assessment
+### AIエージェント機能（現在）
+- 食材ベースのレシピ生成
+- レシピのバリエーション提案
+- 調理のコツと手順
+- 難易度レベル評価
 
-## Contributing
+## 貢献
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Run tests and linting
-5. Submit a pull request
+1. リポジトリをフォーク
+2. 機能ブランチを作成
+3. 変更を加える
+4. テストとリンティングを実行
+5. プルリクエストを提出
 
-## License
+## ライセンス
 
-This project is licensed under the MIT License.
+このプロジェクトはMITライセンスの下でライセンスされています。
 
-## Support
+## サポート
 
-For questions and support, please open an issue in the GitHub repository.
-# Italian-recipe-suggestions
+質問やサポートについては、GitHubリポジトリでIssueを作成してください。
+# イタリア料理レシピ提案システム
