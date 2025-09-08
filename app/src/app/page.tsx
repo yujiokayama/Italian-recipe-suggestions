@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button'
-import Link from 'next/link'
+import Image from 'next/image'
 
 export default function HomePage() {
   return (
@@ -7,11 +7,18 @@ export default function HomePage() {
       {/* ヒーローセクション */}
       <section className="container mx-auto px-4 pt-20 pb-16">
         <div className="text-center max-w-4xl mx-auto">
-          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
-            イタリア料理レシピ提案
-            <span className="block text-italian-red">AI搭載アプリ</span>
+          <h1 className="md:text-5xl font-bold text-gray-900 mb-4">
+            <span className='text-sm'>イタリア料理レシピ提案</span>
+            <span className="block text-italian-red">Buonoくん</span>
           </h1>
-          <p className="text-xl text-gray-600 mb-8 leading-relaxed">
+          <Image 
+            src="/images/buono-kun.png" 
+            alt="Buonoくん" 
+            width={400}
+            height={400}
+            className="mx-auto mb-8" 
+          />
+          <p className="text-xl text-gray-600 leading-relaxed mb-10">
             手持ちの食材を入力するだけで、AIがあなたにぴったりの
             <br className="hidden md:block" />
             本格イタリア料理レシピを瞬時に提案します
