@@ -12,13 +12,10 @@
 ## 技術スタック
 
 ### フロントエンド
-- **Framework**: Next.js 14 (App Router)
+- **Framework**: Next.js(latest)
 - **Language**: TypeScript
-- **UI Library**: React 18
+- **UI Library**: React
 - **Styling**: Tailwind CSS
-- **State Management**: Zustand
-- **Form Handling**: React Hook Form + Zod
-- **HTTP Client**: Axios
 
 ### バックエンド
 - **AI Agent**: VoltAgent
