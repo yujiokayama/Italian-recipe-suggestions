@@ -3,9 +3,9 @@ import Image from 'next/image'
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen bg-gradient-to-br from-italian-green/10 to-italian-red/10">
+    <main className="min-h-screen">
       {/* ヒーローセクション */}
-      <section className="container mx-auto px-4 pt-20 pb-16">
+      <section className="container mx-auto px-4 pt-10 pb-10">
         <div className="text-center max-w-4xl mx-auto">
           <h1 className="md:text-5xl font-bold text-gray-900 mb-4">
             <span className='text-sm'>イタリア料理レシピ提案</span>
