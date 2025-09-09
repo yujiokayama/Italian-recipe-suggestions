@@ -68,15 +68,7 @@ const italianRecipeAgent = new Agent({
     }
   `,
 	parameters: z.object({
-		ingredients: z.array(z.string()).describe("使用する食材のリスト"),
-		preferences: z.object({
-			difficulty: z.enum(["easy", "medium", "hard"]).optional().describe("難易度"),
-			cookingTime: z.number().optional().describe("調理時間（分）"),
-			servings: z.number().optional().describe("人数"),
-			dietaryRestrictions: z.array(z.string()).optional().describe("食事制限")
-		}).optional().describe("料理の設定"),
-		includeVariations: z.boolean().optional().describe("バリエーションレシピを含めるか"),
-		requestedVariations: z.array(z.string()).optional().describe("リクエストされたバリエーション")
+		prompt: z.string().describe("ユーザーからの入力プロンプト"),
 	}),
 	llm: new VercelAIProvider(),
 	model: openai("gpt-4o-mini"),
