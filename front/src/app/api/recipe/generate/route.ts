@@ -104,6 +104,7 @@ function createMockResponse(request: RecipeRequest): RecipeResponse {
 export async function POST(request: NextRequest) {
   try {
     const body: RecipeRequest = await request.json()
+    console.log('Received recipe request:', body)
     
     // バリデーション
     if (!body.ingredients || body.ingredients.length === 0) {
@@ -115,6 +116,7 @@ export async function POST(request: NextRequest) {
 
     // VoltAgentのエンドポイントURL（localhost:3141）
     const voltAgentUrl = process.env.VOLTAGENT_URL || 'http://localhost:3141'
+    console.log('VoltAgent URL:', voltAgentUrl)
     
     // レシピリクエストを自然言語のプロンプトに変換
     const prompt = `以下の条件でイタリアンレシピを生成してください：
@@ -129,96 +131,108 @@ ${body.requestedVariations?.length ? `希望するバリエーション: ${body.
 
 JSON形式でレシピを返してください。`
 
-    // VoltAgentのエージェントを呼び出し
-    const voltAgentResponse = await fetch(`${voltAgentUrl}/agents/italian-recipe-chef/text`, {
-      method: 'POST',
-      headers: {
-        'accept': 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        input: prompt,
-        options: {
-          userId: "recipe-user",
-          conversationId: `recipe-${Date.now()}`,
-          contextLimit: 10,
-          temperature: 0.7,
-          maxTokens: 2000,
-        },
-      })
-    })
+    console.log('Generated prompt:', prompt)
 
-    if (!voltAgentResponse.ok) {
-      const errorText = await voltAgentResponse.text()
-      console.error('VoltAgent error:', voltAgentResponse.status, errorText)
+    try {
+      // VoltAgentのエージェントを呼び出し
+      console.log('Calling VoltAgent...')
+      const voltAgentResponse = await fetch(`${voltAgentUrl}/agents/italian-recipe-chef/text`, {
+        method: 'POST',
+        headers: {
+          'accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          input: prompt,
+          options: {
+            userId: "unique-user-id",
+            conversationId: "unique-conversation-id",
+            contextLimit: 10,
+            temperature: 0.7,
+            maxTokens: 2000,
+          },
+        })
+      })
+
+      console.log('VoltAgent response status:', voltAgentResponse.status)
+
+      if (!voltAgentResponse.ok) {
+        const errorText = await voltAgentResponse.text()
+        console.error('VoltAgent error:', voltAgentResponse.status, errorText)
+        throw new Error(`VoltAgent request failed: ${voltAgentResponse.status}`)
+      }
+
+      const voltAgentResult = await voltAgentResponse.json()
+      console.log('VoltAgent response:', voltAgentResult)
+      
+      // VoltAgentからのテキストレスポンスをパース
+      let parsedResult
+      try {
+        // レスポンスの構造を確認
+        let responseText = ''
+        if (voltAgentResult.output) {
+          responseText = voltAgentResult.output
+        } else if (voltAgentResult.result) {
+          responseText = voltAgentResult.result
+        } else if (typeof voltAgentResult === 'string') {
+          responseText = voltAgentResult
+        } else {
+          // 直接JSONオブジェクトの場合
+          if (voltAgentResult.mainRecipe) {
+            parsedResult = voltAgentResult
+          } else {
+            throw new Error('Unexpected response format from VoltAgent')
+          }
+        }
+
+        // テキストからJSONを抽出
+        if (!parsedResult && responseText) {
+          // JSONブロックを探す（```json...```または{...}）
+          const jsonMatch = responseText.match(/```json\s*([\s\S]*?)\s*```/) || 
+                           responseText.match(/(\{[\s\S]*\})/)
+          
+          if (jsonMatch) {
+            const jsonString = jsonMatch[1]
+            parsedResult = JSON.parse(jsonString)
+          } else {
+            throw new Error('No JSON found in response')
+          }
+        }
+
+        if (!parsedResult) {
+          throw new Error('Failed to parse VoltAgent response')
+        }
+
+      } catch (parseError) {
+        console.error('Failed to parse VoltAgent response:', parseError)
+        console.log('VoltAgent raw response:', voltAgentResult)
+        throw new Error('Failed to parse VoltAgent response')
+      }
+
+      // VoltAgentからのレスポンスをフロントエンド用の形式に変換
+      const response: RecipeResponse = {
+        mainRecipe: parsedResult.mainRecipe,
+        variations: parsedResult.variations,
+        ingredientAnalysis: parsedResult.ingredientAnalysis,
+        metadata: {
+          generated_at: new Date().toISOString(),
+          language: 'ja',
+          format: 'JSON',
+          workflow_version: '1.0',
+          agent_used: 'voltagent'
+        }
+      }
+
+      return NextResponse.json(response)
+
+    } catch (voltAgentError) {
+      console.error('VoltAgent request failed:', voltAgentError)
       
       // VoltAgentが利用できない場合はフォールバックとしてモックレスポンスを使用
-      console.log('Falling back to mock response due to VoltAgent unavailability')
+      console.log('Falling back to mock response due to VoltAgent error')
       const mockResponse = createMockResponse(body)
-      return NextResponse.json({
-        ...mockResponse,
-        metadata: {
-          ...mockResponse.metadata,
-          agent_used: 'mock_fallback',
-          fallback_reason: `VoltAgent error: ${voltAgentResponse.status}`
-        }
-      })
+      return NextResponse.json(mockResponse)
     }
-
-    const voltAgentResult = await voltAgentResponse.json()
-    
-    // VoltAgentからのテキストレスポンスをパース
-    let parsedResult
-    try {
-      // レスポンスがJSONとして直接返される場合
-      if (typeof voltAgentResult === 'object' && voltAgentResult.mainRecipe) {
-        parsedResult = voltAgentResult
-      } 
-      // レスポンスがテキスト形式で返される場合
-      else if (voltAgentResult.result || voltAgentResult.output) {
-        const textResult = voltAgentResult.result || voltAgentResult.output
-        // JSON部分を抽出
-        const jsonMatch = textResult.match(/\{[\s\S]*\}/)
-        if (jsonMatch) {
-          parsedResult = JSON.parse(jsonMatch[0])
-        } else {
-          throw new Error('JSON format not found in response')
-        }
-      }
-      else {
-        throw new Error('Unexpected response format')
-      }
-    } catch (parseError) {
-      console.error('Failed to parse VoltAgent response:', parseError)
-      console.log('VoltAgent raw response:', voltAgentResult)
-      
-      // パースに失敗した場合はモックレスポンスを使用
-      const mockResponse = createMockResponse(body)
-      return NextResponse.json({
-        ...mockResponse,
-        metadata: {
-          ...mockResponse.metadata,
-          agent_used: 'mock_fallback',
-          fallback_reason: 'Failed to parse VoltAgent response'
-        }
-      })
-    }
-
-    // VoltAgentからのレスポンスをフロントエンド用の形式に変換
-    const response: RecipeResponse = {
-      mainRecipe: parsedResult.mainRecipe,
-      variations: parsedResult.variations,
-      ingredientAnalysis: parsedResult.ingredientAnalysis,
-      metadata: {
-        generated_at: new Date().toISOString(),
-        language: 'ja',
-        format: 'JSON',
-        workflow_version: '1.0',
-        agent_used: 'voltagent'
-      }
-    }
-
-    return NextResponse.json(response)
 
   } catch (error) {
     console.error('Recipe generation error:', error)
@@ -228,14 +242,7 @@ JSON形式でレシピを返してください。`
       const body: RecipeRequest = await request.json()
       console.log('Using fallback mock response due to error:', error)
       const mockResponse = createMockResponse(body)
-      return NextResponse.json({
-        ...mockResponse,
-        metadata: {
-          ...mockResponse.metadata,
-          agent_used: 'mock_fallback',
-          fallback_reason: error instanceof Error ? error.message : 'Unknown error'
-        }
-      })
+      return NextResponse.json(mockResponse)
     } catch (fallbackError) {
       return NextResponse.json(
         { error: 'レシピ生成中にエラーが発生しました' },
@@ -244,23 +251,3 @@ JSON形式でレシピを返してください。`
     }
   }
 }
-
-// 実際のVoltAgent連携用の関数（今後実装）
-// async function callVoltAgentWorkflow(request: RecipeRequest): Promise<RecipeResponse> {
-//   const voltAgentEndpoint = process.env.VOLTAGENT_ENDPOINT || 'http://localhost:8000'
-//   
-//   const response = await fetch(`${voltAgentEndpoint}/workflows/italian-recipe-generation`, {
-//     method: 'POST',
-//     headers: {
-//       'Content-Type': 'application/json',
-//       'Authorization': `Bearer ${process.env.VOLTAGENT_API_KEY}`,
-//     },
-//     body: JSON.stringify(request),
-//   })
-//   
-//   if (!response.ok) {
-//     throw new Error(`VoltAgent error: ${response.statusText}`)
-//   }
-//   
-//   return response.json()
-// }
