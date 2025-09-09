@@ -6,30 +6,16 @@ import { z } from "zod";
  */
 export const italianRecipeTool = createTool({
 	name: "generateItalianRecipe",
-	description: "提供された食材を使用してイタリアンレシピを生成する",
+	description: "提供されたプロンプトからイタリアンレシピを生成する",
 	parameters: z.object({
-		ingredients: z.array(z.string()).describe("レシピに使用する食材のリスト"),
-		difficulty: z
-			.enum(["easy", "medium", "hard"])
-			.optional()
-			.describe("希望する難易度レベル"),
-		cookingTime: z.number().optional().describe("最大調理時間（分）"),
-		servings: z.number().optional().describe("人数分"),
+		prompt: z.string().describe("ユーザーからの入力プロンプト"),
 	}),
-	execute: async ({
-		ingredients,
-		difficulty = "medium",
-		cookingTime,
-		servings = 4,
-	}) => {
-		// レシピ生成のための詳細なプロンプトを作成
+	execute: async ({ prompt }) => {
+		// ユーザーのプロンプトを解析してレシピ生成
 		const recipePrompt = `
-      以下の食材を使用して本格的なイタリアンレシピを作成してください：${ingredients.join("、")}
+      ${prompt}
       
-      要件：
-      - 難易度：${difficulty}
-      ${cookingTime ? `- 最大調理時間：${cookingTime}分` : ""}
-      - 人数分：${servings}
+      以下の条件でイタリアンレシピを生成してください：
       - 本格的なイタリア料理であること
       - 正確な分量を含めること
       - ステップバイステップの手順を提供すること
@@ -37,17 +23,58 @@ export const italianRecipeTool = createTool({
       
       必須：レスポンスはJSON形式で以下の構造に従ってください：
       {
-        "recipeName": "レシピ名",
-        "description": "料理の説明",
-        "ingredients": [{"name": "食材名", "amount": "分量", "unit": "単位"}],
-        "instructions": ["手順1", "手順2", ...],
-        "cookingTime": 調理時間（分）,
-        "difficulty": "難易度",
-        "servings": 人数分,
-        "tips": ["調理のコツ1", "調理のコツ2", ...],
-        "cuisine": "Italian",
-        "region": "イタリアの地方（もしあれば）",
-        "wine_pairing": "おすすめワイン"
+        "mainRecipe": {
+          "recipeName": "レシピ名",
+          "description": "料理の説明",
+          "ingredients": [{"name": "食材名", "amount": "分量", "unit": "単位"}],
+          "instructions": ["手順1", "手順2", ...],
+          "cookingTime": 調理時間（分）,
+          "difficulty": "難易度",
+          "servings": 人数分,
+          "tips": ["調理のコツ1", "調理のコツ2", ...],
+          "cuisine": "Italian",
+          "region": "イタリアの地方（もしあれば）",
+          "wine_pairing": "おすすめワイン"
+        },
+        "variations": [
+          {
+            "variationName": "バリエーション名",
+            "modificationType": "バリエーションタイプ",
+            "ingredients": [{"name": "食材名", "amount": "分量", "unit": "単位", "substitution": false}],
+            "instructions": ["手順1", "手順2", ...],
+            "substitutions": [{"original": "元の食材", "replacement": "代替食材", "reason": "理由"}],
+            "nutritionalBenefits": "栄養面での利点",
+            "difficulty": "難易度",
+            "cookingTime": 調理時間（分）,
+            "cuisine": "Italian"
+          }
+        ],
+        "ingredientAnalysis": {
+          "compatibility": "相性評価",
+          "suggestedDishTypes": ["料理タイプ1", "料理タイプ2"],
+          "recommendedAdditions": [
+            {
+              "ingredient": "推奨食材",
+              "reason": "推奨理由",
+              "priority": "high/medium/low"
+            }
+          ],
+          "difficultyAssessment": "難易度評価",
+          "cookingMethods": ["調理法1", "調理法2"],
+          "regionalSuggestions": [
+            {
+              "region": "地方名",
+              "dishName": "料理名",
+              "reason": "選択理由"
+            }
+          ]
+        },
+        "metadata": {
+          "generated_at": "生成日時",
+          "language": "ja",
+          "format": "JSON",
+          "workflow_version": "1.0"
+        }
       }
     `;
 
@@ -56,15 +83,10 @@ export const italianRecipeTool = createTool({
 			type: "recipe_generation_request",
 			prompt: recipePrompt,
 			input_data: {
-				ingredients: ingredients,
-				preferences: {
-					difficulty,
-					cookingTime,
-					servings,
-				},
+				user_prompt: prompt,
 			},
 			expected_format: "JSON",
-			message: `${ingredients.length}個の食材を使用したレシピ生成リクエストを準備しました：${ingredients.join("、")}`,
+			message: `ユーザーのプロンプトに基づいたレシピ生成リクエストを準備しました`,
 			instructions:
 				"AIモデルに上記のプロンプトを送信し、JSON形式でレシピを生成してください",
 		};
