@@ -1,10 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import type { RecipeRequest, VoltAgentResponse } from '@/types'
+import type { NewRecipeRequest, VoltAgentResponse } from '@/types'
 
 interface UseRecipeGenerationReturn {
-  generateRecipe: (request: RecipeRequest) => Promise<void>
+  generateRecipe: (request: NewRecipeRequest) => Promise<void>
   isLoading: boolean
   result: VoltAgentResponse | null
   error: string | null
@@ -19,12 +19,33 @@ export function useRecipeGeneration(): UseRecipeGenerationReturn {
   const [error, setError] = useState<string | null>(null)
   const [voltAgentStatus, setVoltAgentStatus] = useState<'unknown' | 'connected' | 'disconnected' | 'error'>('unknown')
 
-  const generateRecipe = async (request: RecipeRequest) => {
+  const generateRecipe = async (request: NewRecipeRequest) => {
     setIsLoading(true)
     setError(null)
 
     try {
-      console.log('Sending recipe request:', request)
+      // リクエストからプロンプトを生成
+      const ingredientsSection = request.find(item => item.type === 'ingredients')
+      const preferencesSection = request.find(item => item.type === 'preferences')
+      const variationsSection = request.find(item => item.type === 'variations')
+
+      let prompt = ''
+
+      if (ingredientsSection && 'items' in ingredientsSection) {
+        prompt += `食材: ${ingredientsSection.items.join(', ')}\n`
+      }
+
+      if (preferencesSection && 'difficulty' in preferencesSection) {
+        prompt += `難易度: ${preferencesSection.difficulty}\n`
+        prompt += `調理時間: ${preferencesSection.cookingTime}分\n`
+        prompt += `人数: ${preferencesSection.servings}人分\n`
+      }
+
+      if (variationsSection && 'includeVariations' in variationsSection && variationsSection.includeVariations) {
+        prompt += `バリエーション: ${variationsSection.requestedVariations.join(', ')}\n`
+      }
+
+      prompt += '\nこれらの条件でイタリア料理のレシピを教えてください。'
 
       const response = await fetch('http://localhost:3141/agents/italian-recipe-chef/text',       {
         method: "POST",
@@ -33,7 +54,7 @@ export function useRecipeGeneration(): UseRecipeGenerationReturn {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          input: 'カニクリームコロッケのレシピを教えてください',
+          input: prompt,
           options: {
             userId: "unique-user-id",
             conversationId: "unique-conversation-id",

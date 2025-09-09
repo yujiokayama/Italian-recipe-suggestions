@@ -63,7 +63,6 @@ function createMockResponse(request: RecipeRequest): RecipeResponse {
         ],
         nutritionalBenefits: '植物性食材のみを使用し、健康的です。',
         difficulty: preferences?.difficulty || 'medium',
-        cookingTime: (preferences?.cookingTime || 30) + 5,
         cuisine: 'Italian'
       }
     ] : undefined,
@@ -123,7 +122,6 @@ export async function POST(request: NextRequest) {
 
 食材: ${body.ingredients.join(', ')}
 ${body.preferences?.difficulty ? `難易度: ${body.preferences.difficulty}` : ''}
-${body.preferences?.cookingTime ? `調理時間: ${body.preferences.cookingTime}分` : ''}
 ${body.preferences?.servings ? `人数: ${body.preferences.servings}人分` : ''}
 ${body.preferences?.dietaryRestrictions?.length ? `食事制限: ${body.preferences.dietaryRestrictions.join(', ')}` : ''}
 ${body.includeVariations ? `バリエーションレシピも含める` : ''}

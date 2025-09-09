@@ -40,13 +40,30 @@ export interface RecipeRequest {
   ingredients: string[]
   preferences?: {
     difficulty?: 'easy' | 'medium' | 'hard'
-    cookingTime?: number
     servings?: number
     dietaryRestrictions?: ('vegetarian' | 'vegan' | 'gluten-free')[]
   }
   includeVariations?: boolean
   requestedVariations?: ('vegetarian' | 'vegan' | 'gluten-free' | 'spicy' | 'creamy' | 'light')[]
 }
+
+// 新しいリクエスト形式
+export type NewRecipeRequest = Array<
+  | {
+      type: "ingredients"
+      items: string[]
+    }
+  | {
+      type: "preferences"
+      difficulty: 'easy' | 'medium' | 'hard'
+      servings: number
+    }
+  | {
+      type: "variations"
+      includeVariations: boolean
+      requestedVariations: ('vegetarian' | 'vegan' | 'gluten-free' | 'spicy' | 'creamy' | 'light')[]
+    }
+>
 
 export interface VoltAgentRecipe {
   recipeName: string
@@ -57,7 +74,6 @@ export interface VoltAgentRecipe {
     unit: string
   }[]
   instructions: string[]
-  cookingTime: number
   difficulty: string
   servings: number
   tips: string[]
@@ -83,7 +99,7 @@ export interface RecipeVariation {
   }[]
   nutritionalBenefits?: string
   difficulty: string
-  cookingTime: number
+
   cuisine: string
 }
 

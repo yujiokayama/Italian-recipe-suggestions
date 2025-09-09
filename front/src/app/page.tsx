@@ -103,13 +103,6 @@ export default function HomePage() {
               <p className="text-gray-600 max-w-2xl mx-auto mb-6">
                 食材を入力して、Buonoくんに本格的なイタリア料理のレシピを提案してもらいましょう
               </p>
-              <Button 
-                variant="outline" 
-                onClick={() => setShowForm(false)}
-                className="mb-6"
-              >
-                ← ホームに戻る
-              </Button>
             </div>
             <RecipeGenerationForm onBack={() => setShowForm(false)} />
           </div>

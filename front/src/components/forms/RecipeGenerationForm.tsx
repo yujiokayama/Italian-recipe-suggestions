@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useRecipeGeneration } from '@/hooks/useRecipeGeneration'
-import type { RecipeRequest, RecipeResponse } from '@/types'
+import type { NewRecipeRequest, RecipeResponse } from '@/types'
 
 interface RecipeGenerationFormProps {
   onBack?: () => void
@@ -13,8 +13,7 @@ interface RecipeGenerationFormProps {
 export function RecipeGenerationForm({ onBack }: RecipeGenerationFormProps) {
   const [ingredients, setIngredients] = useState<string[]>([''])
   const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium')
-  const [cookingTime, setCookingTime] = useState<number>(30)
-  const [servings, setServings] = useState<number>(4)
+  const [servings, setServings] = useState<number>(2)
   const [includeVariations, setIncludeVariations] = useState<boolean>(true)
   
   const { generateRecipe, isLoading, result, error, clearResult, voltAgentStatus, checkVoltAgentStatus } = useRecipeGeneration()
@@ -45,16 +44,22 @@ export function RecipeGenerationForm({ onBack }: RecipeGenerationFormProps) {
       return
     }
 
-    const request: RecipeRequest = {
-      ingredients: filteredIngredients,
-      preferences: {
-        difficulty,
-        cookingTime,
-        servings,
+    const request: NewRecipeRequest = [
+      {
+        type: "ingredients" as const,
+        items: filteredIngredients
       },
-      includeVariations,
-      requestedVariations: includeVariations ? ['vegetarian'] : [],
-    }
+      {
+        type: "preferences" as const,
+        difficulty,
+        servings
+      },
+      {
+        type: "variations" as const,
+        includeVariations,
+        requestedVariations: includeVariations ? ['vegetarian'] : []
+      }
+    ]
 
     await generateRecipe(request)
   }
@@ -82,7 +87,6 @@ export function RecipeGenerationForm({ onBack }: RecipeGenerationFormProps) {
   }
 
   const recipeData = getRecipeData()
-  console.log('Parsed recipe data:', recipeData)
 
   if (recipeData) {
     return (
@@ -133,7 +137,6 @@ export function RecipeGenerationForm({ onBack }: RecipeGenerationFormProps) {
               <ol className="space-y-2">
                 {recipeData.mainRecipe.instructions.map((instruction: string, index: number) => (
                   <li key={index} className="text-sm">
-                    <span className="font-medium">{index + 1}. </span>
                     {instruction}
                   </li>
                 ))}
@@ -241,13 +244,10 @@ export function RecipeGenerationForm({ onBack }: RecipeGenerationFormProps) {
 
   return (
     <div className="max-w-2xl mx-auto p-6">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-        レシピを生成する
-      </h2>
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* 食材入力 */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-3">
+          <label className="block text-base font-medium text-gray-700 mb-3">
             使用する食材
           </label>
           <div className="space-y-2">
@@ -299,19 +299,6 @@ export function RecipeGenerationForm({ onBack }: RecipeGenerationFormProps) {
               <option value="medium">普通</option>
               <option value="hard">上級</option>
             </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              調理時間（分）
-            </label>
-            <Input
-              type="number"
-              value={cookingTime}
-              onChange={(e) => setCookingTime(Number(e.target.value))}
-              min="5"
-              max="240"
-            />
           </div>
 
           <div>
