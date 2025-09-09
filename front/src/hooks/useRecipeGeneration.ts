@@ -9,12 +9,15 @@ interface UseRecipeGenerationReturn {
   result: RecipeResponse | null
   error: string | null
   clearResult: () => void
+  voltAgentStatus: 'unknown' | 'connected' | 'disconnected' | 'error'
+  checkVoltAgentStatus: () => Promise<void>
 }
 
 export function useRecipeGeneration(): UseRecipeGenerationReturn {
   const [isLoading, setIsLoading] = useState(false)
   const [result, setResult] = useState<RecipeResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [voltAgentStatus, setVoltAgentStatus] = useState<'unknown' | 'connected' | 'disconnected' | 'error'>('unknown')
 
   const generateRecipe = async (request: RecipeRequest) => {
     setIsLoading(true)
@@ -35,10 +38,34 @@ export function useRecipeGeneration(): UseRecipeGenerationReturn {
 
       const data = await response.json()
       setResult(data)
+      
+      // レスポンスのメタデータからエージェントの使用状況を確認
+      if (data.metadata?.agent_used === 'voltagent') {
+        setVoltAgentStatus('connected')
+      } else if (data.metadata?.agent_used === 'mock_fallback') {
+        setVoltAgentStatus('disconnected')
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'レシピ生成に失敗しました')
+      setVoltAgentStatus('error')
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const checkVoltAgentStatus = async () => {
+    try {
+      const response = await fetch('/api/voltagent/status', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+
+      const data = await response.json()
+      setVoltAgentStatus(data.status)
+    } catch (err) {
+      setVoltAgentStatus('error')
     }
   }
 
@@ -53,5 +80,7 @@ export function useRecipeGeneration(): UseRecipeGenerationReturn {
     result,
     error,
     clearResult,
+    voltAgentStatus,
+    checkVoltAgentStatus,
   }
 }

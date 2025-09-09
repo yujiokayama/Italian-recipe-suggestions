@@ -17,7 +17,7 @@ export function RecipeGenerationForm({ onBack }: RecipeGenerationFormProps) {
   const [servings, setServings] = useState<number>(4)
   const [includeVariations, setIncludeVariations] = useState<boolean>(true)
   
-  const { generateRecipe, isLoading, result, error, clearResult } = useRecipeGeneration()
+  const { generateRecipe, isLoading, result, error, clearResult, voltAgentStatus, checkVoltAgentStatus } = useRecipeGeneration()
 
   const handleIngredientChange = (index: number, value: string) => {
     const newIngredients = [...ingredients]
@@ -171,6 +171,38 @@ export function RecipeGenerationForm({ onBack }: RecipeGenerationFormProps) {
       <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
         レシピを生成する
       </h2>
+      
+      {/* VoltAgentステータス表示 */}
+      <div className="mb-6">
+        <div className="flex items-center justify-between bg-gray-50 rounded-lg p-3">
+          <div className="flex items-center space-x-3">
+            <span className="text-sm font-medium text-gray-700">VoltAgent 接続状態:</span>
+            <div className="flex items-center space-x-2">
+              <div className={`w-2 h-2 rounded-full ${
+                voltAgentStatus === 'connected' ? 'bg-green-500' :
+                voltAgentStatus === 'disconnected' ? 'bg-yellow-500' :
+                voltAgentStatus === 'error' ? 'bg-red-500' :
+                'bg-gray-400'
+              }`} />
+              <span className="text-sm text-gray-600">
+                {voltAgentStatus === 'connected' ? '接続済み' :
+                 voltAgentStatus === 'disconnected' ? '未接続（モック使用）' :
+                 voltAgentStatus === 'error' ? 'エラー' :
+                 '不明'}
+              </span>
+            </div>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={checkVoltAgentStatus}
+            className="text-xs px-2 py-1"
+          >
+            ステータス確認
+          </Button>
+        </div>
+      </div>
       
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* 食材入力 */}

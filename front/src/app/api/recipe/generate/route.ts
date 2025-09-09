@@ -113,20 +113,135 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 実際の実装では、ここでVoltAgentのワークフローを呼び出します
-    // const response = await callVoltAgentWorkflow(body)
+    // VoltAgentのエンドポイントURL（localhost:3141）
+    const voltAgentUrl = process.env.VOLTAGENT_URL || 'http://localhost:3141'
     
-    // 開発用のモックレスポンス
-    const mockResponse = createMockResponse(body)
+    // レシピリクエストを自然言語のプロンプトに変換
+    const prompt = `以下の条件でイタリアンレシピを生成してください：
+
+食材: ${body.ingredients.join(', ')}
+${body.preferences?.difficulty ? `難易度: ${body.preferences.difficulty}` : ''}
+${body.preferences?.cookingTime ? `調理時間: ${body.preferences.cookingTime}分` : ''}
+${body.preferences?.servings ? `人数: ${body.preferences.servings}人分` : ''}
+${body.preferences?.dietaryRestrictions?.length ? `食事制限: ${body.preferences.dietaryRestrictions.join(', ')}` : ''}
+${body.includeVariations ? `バリエーションレシピも含める` : ''}
+${body.requestedVariations?.length ? `希望するバリエーション: ${body.requestedVariations.join(', ')}` : ''}
+
+JSON形式でレシピを返してください。`
+
+    // VoltAgentのエージェントを呼び出し
+    const voltAgentResponse = await fetch(`${voltAgentUrl}/agents/italian-recipe-chef/text`, {
+      method: 'POST',
+      headers: {
+        'accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        input: prompt,
+        options: {
+          userId: "recipe-user",
+          conversationId: `recipe-${Date.now()}`,
+          contextLimit: 10,
+          temperature: 0.7,
+          maxTokens: 2000,
+        },
+      })
+    })
+
+    if (!voltAgentResponse.ok) {
+      const errorText = await voltAgentResponse.text()
+      console.error('VoltAgent error:', voltAgentResponse.status, errorText)
+      
+      // VoltAgentが利用できない場合はフォールバックとしてモックレスポンスを使用
+      console.log('Falling back to mock response due to VoltAgent unavailability')
+      const mockResponse = createMockResponse(body)
+      return NextResponse.json({
+        ...mockResponse,
+        metadata: {
+          ...mockResponse.metadata,
+          agent_used: 'mock_fallback',
+          fallback_reason: `VoltAgent error: ${voltAgentResponse.status}`
+        }
+      })
+    }
+
+    const voltAgentResult = await voltAgentResponse.json()
     
-    return NextResponse.json(mockResponse)
-    
+    // VoltAgentからのテキストレスポンスをパース
+    let parsedResult
+    try {
+      // レスポンスがJSONとして直接返される場合
+      if (typeof voltAgentResult === 'object' && voltAgentResult.mainRecipe) {
+        parsedResult = voltAgentResult
+      } 
+      // レスポンスがテキスト形式で返される場合
+      else if (voltAgentResult.result || voltAgentResult.output) {
+        const textResult = voltAgentResult.result || voltAgentResult.output
+        // JSON部分を抽出
+        const jsonMatch = textResult.match(/\{[\s\S]*\}/)
+        if (jsonMatch) {
+          parsedResult = JSON.parse(jsonMatch[0])
+        } else {
+          throw new Error('JSON format not found in response')
+        }
+      }
+      else {
+        throw new Error('Unexpected response format')
+      }
+    } catch (parseError) {
+      console.error('Failed to parse VoltAgent response:', parseError)
+      console.log('VoltAgent raw response:', voltAgentResult)
+      
+      // パースに失敗した場合はモックレスポンスを使用
+      const mockResponse = createMockResponse(body)
+      return NextResponse.json({
+        ...mockResponse,
+        metadata: {
+          ...mockResponse.metadata,
+          agent_used: 'mock_fallback',
+          fallback_reason: 'Failed to parse VoltAgent response'
+        }
+      })
+    }
+
+    // VoltAgentからのレスポンスをフロントエンド用の形式に変換
+    const response: RecipeResponse = {
+      mainRecipe: parsedResult.mainRecipe,
+      variations: parsedResult.variations,
+      ingredientAnalysis: parsedResult.ingredientAnalysis,
+      metadata: {
+        generated_at: new Date().toISOString(),
+        language: 'ja',
+        format: 'JSON',
+        workflow_version: '1.0',
+        agent_used: 'voltagent'
+      }
+    }
+
+    return NextResponse.json(response)
+
   } catch (error) {
     console.error('Recipe generation error:', error)
-    return NextResponse.json(
-      { error: 'レシピ生成中にエラーが発生しました' },
-      { status: 500 }
-    )
+    
+    // エラー時はフォールバックとしてモックレスポンスを試行
+    try {
+      const body: RecipeRequest = await request.json()
+      console.log('Using fallback mock response due to error:', error)
+      const mockResponse = createMockResponse(body)
+      return NextResponse.json({
+        ...mockResponse,
+        metadata: {
+          ...mockResponse.metadata,
+          agent_used: 'mock_fallback',
+          fallback_reason: error instanceof Error ? error.message : 'Unknown error'
+        }
+      })
+    } catch (fallbackError) {
+      return NextResponse.json(
+        { error: 'レシピ生成中にエラーが発生しました' },
+        { status: 500 }
+      )
+    }
   }
 }
 

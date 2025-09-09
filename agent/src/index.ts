@@ -39,9 +39,44 @@ const italianRecipeAgent = new Agent({
 
     常に本格性を保ちながら、食材の組み合わせに創造性を発揮してください。
     家庭料理に適した詳細で分かりやすい手順を提供してください。
+
+    入力されたレシピリクエストを解析し、JSON形式でレシピを返してください。
+    レスポンス形式：
+    {
+      "mainRecipe": {
+        "recipeName": "レシピ名",
+        "description": "レシピの説明",
+        "ingredients": [{"name": "食材名", "amount": "量", "unit": "単位"}],
+        "instructions": ["手順1", "手順2", ...],
+        "cookingTime": 調理時間(分),
+        "difficulty": "easy|medium|hard",
+        "servings": 人数,
+        "tips": ["コツ1", "コツ2", ...],
+        "cuisine": "Italian",
+        "region": "地方名",
+        "wine_pairing": "ワインペアリング"
+      },
+      "variations": [バリエーションレシピ配列],
+      "ingredientAnalysis": {
+        "compatibility": "高|中|低",
+        "suggestedDishTypes": ["料理タイプ"],
+        "recommendedAdditions": [{"ingredient": "食材", "reason": "理由", "priority": "high|medium|low"}],
+        "difficultyAssessment": "難易度評価",
+        "cookingMethods": ["調理方法"],
+        "regionalSuggestions": [{"region": "地方", "dishName": "料理名", "reason": "理由"}]
+      }
+    }
   `,
 	parameters: z.object({
-		prompt: z.string().describe("ユーザーからの入力プロンプト"),
+		ingredients: z.array(z.string()).describe("使用する食材のリスト"),
+		preferences: z.object({
+			difficulty: z.enum(["easy", "medium", "hard"]).optional().describe("難易度"),
+			cookingTime: z.number().optional().describe("調理時間（分）"),
+			servings: z.number().optional().describe("人数"),
+			dietaryRestrictions: z.array(z.string()).optional().describe("食事制限")
+		}).optional().describe("料理の設定"),
+		includeVariations: z.boolean().optional().describe("バリエーションレシピを含めるか"),
+		requestedVariations: z.array(z.string()).optional().describe("リクエストされたバリエーション")
 	}),
 	llm: new VercelAIProvider(),
 	model: openai("gpt-4o-mini"),
