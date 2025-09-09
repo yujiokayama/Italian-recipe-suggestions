@@ -40,6 +40,7 @@ export interface RecipeRequest {
   ingredients: string[]
   preferences?: {
     difficulty?: 'easy' | 'medium' | 'hard'
+    cookingTime?: number
     servings?: number
     dietaryRestrictions?: ('vegetarian' | 'vegan' | 'gluten-free')[]
   }
@@ -56,6 +57,7 @@ export type NewRecipeRequest = Array<
   | {
       type: "preferences"
       difficulty: 'easy' | 'medium' | 'hard'
+      cookingTime: number
       servings: number
     }
   | {
@@ -74,6 +76,7 @@ export interface VoltAgentRecipe {
     unit: string
   }[]
   instructions: string[]
+  cookingTime: number
   difficulty: string
   servings: number
   tips: string[]
@@ -99,7 +102,7 @@ export interface RecipeVariation {
   }[]
   nutritionalBenefits?: string
   difficulty: string
-
+  cookingTime: number
   cuisine: string
 }
 

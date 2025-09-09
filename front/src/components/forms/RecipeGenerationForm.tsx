@@ -13,6 +13,7 @@ interface RecipeGenerationFormProps {
 export function RecipeGenerationForm({ onBack }: RecipeGenerationFormProps) {
   const [ingredients, setIngredients] = useState<string[]>([''])
   const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium')
+  const [cookingTime, setCookingTime] = useState<number>(30)
   const [servings, setServings] = useState<number>(2)
   const [includeVariations, setIncludeVariations] = useState<boolean>(true)
   
@@ -52,6 +53,7 @@ export function RecipeGenerationForm({ onBack }: RecipeGenerationFormProps) {
       {
         type: "preferences" as const,
         difficulty,
+        cookingTime,
         servings
       },
       {
