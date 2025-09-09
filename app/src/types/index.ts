@@ -35,18 +35,83 @@ export interface Instruction {
   description: string
 }
 
+// VoltAgentワークフローに対応した型定義
 export interface RecipeRequest {
   ingredients: string[]
-  userId: string
   preferences?: {
-    cookingTime?: number
     difficulty?: 'easy' | 'medium' | 'hard'
-    dietaryRestrictions?: string[]
+    cookingTime?: number
+    servings?: number
+    dietaryRestrictions?: ('vegetarian' | 'vegan' | 'gluten-free')[]
   }
+  includeVariations?: boolean
+  requestedVariations?: ('vegetarian' | 'vegan' | 'gluten-free' | 'spicy' | 'creamy' | 'light')[]
+}
+
+export interface VoltAgentRecipe {
+  recipeName: string
+  description: string
+  ingredients: {
+    name: string
+    amount: string
+    unit: string
+  }[]
+  instructions: string[]
+  cookingTime: number
+  difficulty: string
+  servings: number
+  tips: string[]
+  cuisine: string
+  region?: string
+  wine_pairing?: string
+}
+
+export interface RecipeVariation {
+  variationName: string
+  modificationType: string
+  ingredients: {
+    name: string
+    amount: string
+    unit: string
+    substitution?: boolean
+  }[]
+  instructions: string[]
+  substitutions: {
+    original: string
+    replacement: string
+    reason: string
+  }[]
+  nutritionalBenefits?: string
+  difficulty: string
+  cookingTime: number
+  cuisine: string
+}
+
+export interface IngredientAnalysis {
+  compatibility: string
+  suggestedDishTypes: string[]
+  recommendedAdditions: {
+    ingredient: string
+    reason: string
+    priority: 'high' | 'medium' | 'low'
+  }[]
+  difficultyAssessment: string
+  cookingMethods: string[]
+  regionalSuggestions: {
+    region: string
+    dishName: string
+    reason: string
+  }[]
 }
 
 export interface RecipeResponse {
-  mainRecipe: Recipe
-  variations: Recipe[]
-  tips: string[]
+  mainRecipe: VoltAgentRecipe
+  variations?: RecipeVariation[]
+  ingredientAnalysis: IngredientAnalysis
+  metadata: {
+    generated_at: string
+    language: string
+    format: string
+    workflow_version: string
+  }
 }
