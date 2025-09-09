@@ -1,75 +1,63 @@
 import "dotenv/config";
-import { VoltAgent, VoltOpsClient, Agent } from "@voltagent/core";
+import { openai } from "@ai-sdk/openai";
+import { Agent, VoltAgent, VoltOpsClient } from "@voltagent/core";
 import { createPinoLogger } from "@voltagent/logger";
 import { VercelAIProvider } from "@voltagent/vercel-ai";
-import { openai } from "@ai-sdk/openai";
-import { expenseApprovalWorkflow, italianRecipeWorkflow } from "./workflows";
-import { 
-  weatherTool, 
-  italianRecipeTool, 
-  recipeVariationTool, 
-  ingredientAnalysisTool 
+import {
+	ingredientAnalysisTool,
+	italianRecipeTool,
+	recipeVariationTool,
 } from "./tools";
+import { expenseApprovalWorkflow, italianRecipeWorkflow } from "./workflows";
 
 // Create a logger instance
 const logger = createPinoLogger({
-  name: "italian-recipe-agent",
-  level: "info",
+	name: "italian-recipe-agent",
+	level: "info",
 });
 
 // Create the main Italian Recipe Agent
 const italianRecipeAgent = new Agent({
-  name: "italian-recipe-chef",
-  instructions: `
-    You are a professional Italian chef AI assistant specialized in creating authentic Italian recipes.
-    
-    Your expertise includes:
-    - Traditional Italian cooking techniques and ingredients
-    - Regional Italian cuisine variations
-    - Ingredient substitutions and dietary adaptations
-    - Cooking time and difficulty assessments
-    - Seasonal and authentic Italian ingredient usage
-    
-    When users provide ingredients, you should:
-    1. Analyze ingredient compatibility with Italian cuisine
-    2. Generate authentic Italian recipes using those ingredients
-    3. Provide variations for dietary restrictions (vegetarian, vegan, gluten-free)
-    4. Include cooking tips and traditional techniques
-    5. Suggest complementary ingredients or wine pairings
-    
-    Always maintain authenticity while being creative with ingredient combinations.
-    Provide detailed, easy-to-follow instructions suitable for home cooks.
-  `,
-  llm: new VercelAIProvider(),
-  model: openai("gpt-4o-mini"),
-  tools: [
-    italianRecipeTool,
-    recipeVariationTool,
-    ingredientAnalysisTool,
-  ],
-});
+	name: "italian-recipe-chef",
+	instructions: `
+    あなたは本格的なイタリア料理の専門シェフAIアシスタントです。
 
-// Create a general purpose agent (keeping the existing one)
-const generalAgent = new Agent({
-  name: "general-assistant",
-  instructions: "A helpful assistant that can check weather and help with various tasks",
-  llm: new VercelAIProvider(),
-  model: openai("gpt-4o-mini"),
-  tools: [weatherTool],
+    あなたの専門知識には以下が含まれます：
+    - 伝統的なイタリア料理の調理技術と食材
+    - イタリア各地方の郷土料理のバリエーション
+    - 食材の代替案と食事制限への対応
+    - 調理時間と難易度の評価
+    - 季節性と本格的なイタリア食材の使用
+
+    ユーザーが食材を提供した場合、以下を行ってください：
+    1. 食材とイタリア料理の相性を分析する
+    2. それらの食材を使用した本格的なイタリアンレシピを生成する
+    3. 食事制限に対応したバリエーションを提供する（ベジタリアン、ビーガン、グルテンフリー）
+    4. 調理のコツと伝統的な技法を含める
+    5. 相性の良い食材やワインペアリングを提案する
+
+    常に本格性を保ちながら、食材の組み合わせに創造性を発揮してください。
+    家庭料理に適した詳細で分かりやすい手順を提供してください。
+
+    **重要：すべてのレスポンスはJSON形式で返してください。**
+    レシピ情報、分析結果、提案などはすべて構造化されたJSONオブジェクトとして出力してください。
+  `,
+	llm: new VercelAIProvider(),
+	model: openai("gpt-4o-mini"),
+	tools: [italianRecipeTool, recipeVariationTool, ingredientAnalysisTool],
 });
 
 new VoltAgent({
-  agents: {
-    "italian-recipe-chef": italianRecipeAgent,
-    "general-assistant": generalAgent,
-  },
-  workflows: {
-    expenseApprovalWorkflow,
-    italianRecipeWorkflow,
-  },
-  logger,
-  voltOpsClient: new VoltOpsClient({
-    publicKey: process.env.VOLTAGENT_PUBLIC_KEY || "",
-    secretKey: process.env.VOLTAGENT_SECRET_KEY || "",
-  }),
+	agents: {
+		"italian-recipe-chef": italianRecipeAgent,
+	},
+	workflows: {
+		expenseApprovalWorkflow,
+		italianRecipeWorkflow,
+	},
+	logger,
+	voltOpsClient: new VoltOpsClient({
+		publicKey: process.env.VOLTAGENT_PUBLIC_KEY || "",
+		secretKey: process.env.VOLTAGENT_SECRET_KEY || "",
+	}),
 });

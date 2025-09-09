@@ -5,135 +5,220 @@ import { z } from "zod";
  * A tool for generating Italian recipes based on given ingredients
  */
 export const italianRecipeTool = createTool({
-  name: "generateItalianRecipe",
-  description: "Generate an Italian recipe using the provided ingredients",
-  parameters: z.object({
-    ingredients: z.array(z.string()).describe("List of ingredients to use in the recipe"),
-    difficulty: z.enum(["easy", "medium", "hard"]).optional().describe("Preferred difficulty level"),
-    cookingTime: z.number().optional().describe("Maximum cooking time in minutes"),
-    servings: z.number().optional().describe("Number of servings"),
-  }),
-  execute: async ({ ingredients, difficulty = "medium", cookingTime, servings = 4 }) => {
-    // Create a detailed prompt for recipe generation
-    const recipePrompt = `
-      Create an authentic Italian recipe using these ingredients: ${ingredients.join(", ")}.
+	name: "generateItalianRecipe",
+	description: "提供された食材を使用してイタリアンレシピを生成する",
+	parameters: z.object({
+		ingredients: z.array(z.string()).describe("レシピに使用する食材のリスト"),
+		difficulty: z
+			.enum(["easy", "medium", "hard"])
+			.optional()
+			.describe("希望する難易度レベル"),
+		cookingTime: z.number().optional().describe("最大調理時間（分）"),
+		servings: z.number().optional().describe("人数分"),
+	}),
+	execute: async ({
+		ingredients,
+		difficulty = "medium",
+		cookingTime,
+		servings = 4,
+	}) => {
+		// レシピ生成のための詳細なプロンプトを作成
+		const recipePrompt = `
+      以下の食材を使用して本格的なイタリアンレシピを作成してください：${ingredients.join("、")}
       
-      Requirements:
-      - Difficulty: ${difficulty}
-      ${cookingTime ? `- Maximum cooking time: ${cookingTime} minutes` : ""}
-      - Servings: ${servings}
-      - Must be an authentic Italian dish
-      - Include exact measurements
-      - Provide step-by-step instructions
-      - Include cooking tips
+      要件：
+      - 難易度：${difficulty}
+      ${cookingTime ? `- 最大調理時間：${cookingTime}分` : ""}
+      - 人数分：${servings}
+      - 本格的なイタリア料理であること
+      - 正確な分量を含めること
+      - ステップバイステップの手順を提供すること
+      - 調理のコツを含めること
       
-      Format the response as a JSON object with:
-      - recipeName: string
-      - description: string
-      - ingredients: array of objects with {name, amount, unit}
-      - instructions: array of step-by-step instructions
-      - cookingTime: number (in minutes)
-      - difficulty: string
-      - servings: number
-      - tips: array of cooking tips
-      - cuisine: "Italian"
+      必須：レスポンスはJSON形式で以下の構造に従ってください：
+      {
+        "recipeName": "レシピ名",
+        "description": "料理の説明",
+        "ingredients": [{"name": "食材名", "amount": "分量", "unit": "単位"}],
+        "instructions": ["手順1", "手順2", ...],
+        "cookingTime": 調理時間（分）,
+        "difficulty": "難易度",
+        "servings": 人数分,
+        "tips": ["調理のコツ1", "調理のコツ2", ...],
+        "cuisine": "Italian",
+        "region": "イタリアの地方（もしあれば）",
+        "wine_pairing": "おすすめワイン"
+      }
     `;
 
-    // This would typically call an LLM to generate the recipe
-    // For now, return a structured response that can be used by the workflow
-    return {
-      prompt: recipePrompt,
-      ingredients: ingredients,
-      preferences: {
-        difficulty,
-        cookingTime,
-        servings,
-      },
-      message: `Recipe generation request prepared for ${ingredients.length} ingredients: ${ingredients.join(", ")}`,
-    };
-  },
+		// 構造化されたレスポンスを返す
+		return {
+			type: "recipe_generation_request",
+			prompt: recipePrompt,
+			input_data: {
+				ingredients: ingredients,
+				preferences: {
+					difficulty,
+					cookingTime,
+					servings,
+				},
+			},
+			expected_format: "JSON",
+			message: `${ingredients.length}個の食材を使用したレシピ生成リクエストを準備しました：${ingredients.join("、")}`,
+			instructions:
+				"AIモデルに上記のプロンプトを送信し、JSON形式でレシピを生成してください",
+		};
+	},
 });
 
 /**
  * A tool for generating recipe variations/arrangements
  */
 export const recipeVariationTool = createTool({
-  name: "generateRecipeVariations",
-  description: "Generate variations of an existing Italian recipe",
-  parameters: z.object({
-    baseRecipe: z.string().describe("The base recipe name or description"),
-    variationType: z.enum(["vegetarian", "vegan", "gluten-free", "spicy", "creamy", "light"]).describe("Type of variation to create"),
-    additionalIngredients: z.array(z.string()).optional().describe("Additional ingredients to incorporate"),
-  }),
-  execute: async ({ baseRecipe, variationType, additionalIngredients = [] }) => {
-    const variationPrompt = `
-      Create a ${variationType} variation of this Italian recipe: ${baseRecipe}
+	name: "generateRecipeVariations",
+	description: "既存のイタリアンレシピのバリエーションを生成する",
+	parameters: z.object({
+		baseRecipe: z.string().describe("ベースとなるレシピ名または説明"),
+		variationType: z
+			.enum(["vegetarian", "vegan", "gluten-free", "spicy", "creamy", "light"])
+			.describe("作成するバリエーションの種類"),
+		additionalIngredients: z
+			.array(z.string())
+			.optional()
+			.describe("追加で組み込む食材"),
+	}),
+	execute: async ({
+		baseRecipe,
+		variationType,
+		additionalIngredients = [],
+	}) => {
+		const variationTypeJa = {
+			vegetarian: "ベジタリアン",
+			vegan: "ビーガン",
+			"gluten-free": "グルテンフリー",
+			spicy: "スパイシー",
+			creamy: "クリーミー",
+			light: "ライト",
+		}[variationType];
+
+		const variationPrompt = `
+      以下のイタリアンレシピの${variationTypeJa}バージョンを作成してください：${baseRecipe}
       
-      ${additionalIngredients.length > 0 ? `Additional ingredients to include: ${additionalIngredients.join(", ")}` : ""}
+      ${additionalIngredients.length > 0 ? `追加で含める食材：${additionalIngredients.join("、")}` : ""}
       
-      Requirements:
-      - Maintain Italian authenticity
-      - Clearly explain modifications from the original
-      - Ensure the variation meets the ${variationType} requirements
-      - Provide substitution explanations
+      要件：
+      - イタリア料理の本格性を維持する
+      - オリジナルからの変更点を明確に説明する
+      - バリエーションが${variationTypeJa}の要件を満たすことを確認する
+      - 代替食材の説明を提供する
       
-      Format as JSON with:
-      - variationName: string
-      - originalRecipe: string
-      - modificationType: string
-      - ingredients: array with substitutions noted
-      - instructions: modified step-by-step instructions
-      - substitutions: array of {original, replacement, reason}
-      - nutritionalBenefits: string (if applicable)
+      必須：レスポンスはJSON形式で以下の構造に従ってください：
+      {
+        "variationName": "バリエーション名",
+        "originalRecipe": "オリジナルレシピ名",
+        "modificationType": "${variationTypeJa}",
+        "ingredients": [{"name": "食材名", "amount": "分量", "unit": "単位", "substitution": "代替理由（もしあれば）"}],
+        "instructions": ["変更された手順1", "変更された手順2", ...],
+        "substitutions": [{"original": "元の食材", "replacement": "代替食材", "reason": "理由"}],
+        "nutritionalBenefits": "栄養面での利点（該当する場合）",
+        "difficulty": "難易度",
+        "cookingTime": 調理時間（分）,
+        "cuisine": "Italian"
+      }
     `;
 
-    return {
-      prompt: variationPrompt,
-      baseRecipe,
-      variationType,
-      additionalIngredients,
-      message: `Recipe variation request prepared: ${variationType} version of ${baseRecipe}`,
-    };
-  },
+		return {
+			type: "recipe_variation_request",
+			prompt: variationPrompt,
+			input_data: {
+				baseRecipe,
+				variationType,
+				variationTypeJa,
+				additionalIngredients,
+			},
+			expected_format: "JSON",
+			message: `レシピバリエーションリクエストを準備しました：${baseRecipe}の${variationTypeJa}バージョン`,
+			instructions:
+				"AIモデルに上記のプロンプトを送信し、JSON形式でバリエーションレシピを生成してください",
+		};
+	},
 });
 
 /**
  * A tool for analyzing ingredient compatibility with Italian cuisine
  */
 export const ingredientAnalysisTool = createTool({
-  name: "analyzeIngredients",
-  description: "Analyze ingredients for Italian recipe compatibility and suggest combinations",
-  parameters: z.object({
-    ingredients: z.array(z.string()).describe("Ingredients to analyze"),
-  }),
-  execute: async ({ ingredients }) => {
-    const analysisPrompt = `
-      Analyze these ingredients for Italian recipe compatibility: ${ingredients.join(", ")}
+	name: "analyzeIngredients",
+	description: "イタリア料理への食材の適性を分析し、組み合わせを提案する",
+	parameters: z.object({
+		ingredients: z.array(z.string()).describe("分析する食材"),
+	}),
+	execute: async ({ ingredients }) => {
+		const analysisPrompt = `
+      以下の食材についてイタリア料理への適性を分析してください：${ingredients.join("、")}
       
-      Provide analysis including:
-      - Traditional Italian usage of each ingredient
-      - Compatibility ratings between ingredients
-      - Suggested Italian dish categories (pasta, risotto, pizza, etc.)
-      - Seasonal considerations
-      - Regional Italian variations
-      - Missing ingredients that would complement the selection
+      以下を含む分析を提供してください：
+      - 各食材の伝統的なイタリア料理での使用法
+      - 食材間の相性評価
+      - 提案されるイタリア料理のカテゴリ（パスタ、リゾット、ピッツァなど）
+      - 季節性の考慮
+      - イタリア地方別のバリエーション
+      - この組み合わせを補完する不足食材
       
-      Format as JSON with:
-      - ingredientAnalysis: array of {ingredient, italianUsage, seasonality, region}
-      - compatibility: object with compatibility scores
-      - suggestedDishTypes: array of Italian dish categories
-      - recommendedAdditions: array of complementary ingredients
-      - difficultyAssessment: string
+      必須：レスポンスはJSON形式で以下の構造に従ってください：
+      {
+        "ingredientAnalysis": [
+          {
+            "ingredient": "食材名",
+            "italianUsage": "イタリア料理での使用法",
+            "seasonality": "季節性",
+            "region": "関連する地方",
+            "compatibilityScore": 数値（1-10）
+          }
+        ],
+        "compatibility": {
+          "overallScore": 全体的な相性スコア（1-10）,
+          "pairings": ["相性の良い組み合わせ"]
+        },
+        "suggestedDishTypes": ["パスタ", "リゾット", "ピッツァ", ...],
+        "recommendedAdditions": [
+          {
+            "ingredient": "推奨追加食材",
+            "reason": "追加理由",
+            "priority": "高/中/低"
+          }
+        ],
+        "difficultyAssessment": "難易度評価",
+        "cookingMethods": ["調理法1", "調理法2", ...],
+        "regionalSuggestions": [
+          {
+            "region": "地方名",
+            "dishName": "料理名",
+            "reason": "選択理由"
+          }
+        ]
+      }
     `;
 
-    return {
-      prompt: analysisPrompt,
-      ingredients,
-      analysis: {
-        ingredientCount: ingredients.length,
-        complexity: ingredients.length > 5 ? "high" : ingredients.length > 3 ? "medium" : "low",
-      },
-      message: `Ingredient analysis prepared for ${ingredients.length} ingredients`,
-    };
-  },
+		return {
+			type: "ingredient_analysis_request",
+			prompt: analysisPrompt,
+			input_data: {
+				ingredients,
+				analysis: {
+					ingredientCount: ingredients.length,
+					complexity:
+						ingredients.length > 5
+							? "高"
+							: ingredients.length > 3
+								? "中"
+								: "低",
+				},
+			},
+			expected_format: "JSON",
+			message: `${ingredients.length}個の食材の分析リクエストを準備しました`,
+			instructions:
+				"AIモデルに上記のプロンプトを送信し、JSON形式で食材分析を生成してください",
+		};
+	},
 });
