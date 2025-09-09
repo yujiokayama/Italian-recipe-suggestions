@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useRecipeGeneration } from '@/hooks/useRecipeGeneration'
-import type { RecipeRequest } from '@/types'
+import type { RecipeRequest, RecipeResponse } from '@/types'
 
 interface RecipeGenerationFormProps {
   onBack?: () => void
@@ -59,38 +59,79 @@ export function RecipeGenerationForm({ onBack }: RecipeGenerationFormProps) {
     await generateRecipe(request)
   }
 
-  if (result) {
+  // レスポンスからレシピデータを抽出する関数
+  const getRecipeData = (): RecipeResponse | null => {
+    if (!result) return null
+    
+    try {
+      // result.data.provider.steps[0].content[0].text からJSONを抽出
+      const textContent = result.data?.provider?.steps?.[0]?.content?.[0]?.text
+
+      if (!textContent) return null
+
+      // JSONブロックを抽出（```json ... ``` の形式）
+      const jsonMatch = textContent.match(/```json\n([\s\S]*?)\n```/)
+      if (!jsonMatch) return null
+
+      return JSON.parse(jsonMatch[1]) as RecipeResponse
+    } catch (error) {
+      console.error('Recipe data parsing error:', error)
+
+      return null
+    }
+  }
+
+  const recipeData = getRecipeData()
+  console.log('Parsed recipe data:', recipeData)
+
+  if (recipeData) {
     return (
       <div className="max-w-4xl mx-auto p-6">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-gray-900">生成されたレシピ</h2>
+          <div className="space-x-2">
+            <Button
+              variant="outline"
+              onClick={clearResult}
+            >
+              新しいレシピを生成
+            </Button>
+            {onBack && (
+              <Button
+                variant="outline"
+                onClick={onBack}
+              >
+                戻る
+              </Button>
+            )}
+          </div>
         </div>
-        
+
         {/* メインレシピ */}
         <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
           <h3 className="text-xl font-bold text-italian-red mb-2">
-            {result.mainRecipe.recipeName}
+            {recipeData.mainRecipe.recipeName}
           </h3>
-          <p className="text-gray-600 mb-4">{result.mainRecipe.description}</p>
-          
+          <p className="text-gray-600 mb-4">{recipeData.mainRecipe.description}</p>
+
           <div className="grid md:grid-cols-2 gap-6">
             {/* 食材 */}
             <div>
-              <h4 className="font-semibold mb-3">食材 ({result.mainRecipe.servings}人分)</h4>
+              <h4 className="font-semibold mb-3">食材 ({recipeData.mainRecipe.servings}人分)</h4>
               <ul className="space-y-1">
-                {result.mainRecipe.ingredients.map((ingredient, index) => (
+                {recipeData.mainRecipe.ingredients.map((ingredient: any, index: number) => (
                   <li key={index} className="text-sm">
                     {ingredient.name}: {ingredient.amount} {ingredient.unit}
                   </li>
                 ))}
               </ul>
             </div>
-            
+
             {/* 作り方 */}
             <div>
               <h4 className="font-semibold mb-3">作り方</h4>
               <ol className="space-y-2">
-                {result.mainRecipe.instructions.map((instruction, index) => (
+                {recipeData.mainRecipe.instructions.map((instruction: string, index: number) => (
                   <li key={index} className="text-sm">
                     <span className="font-medium">{index + 1}. </span>
                     {instruction}
@@ -99,28 +140,28 @@ export function RecipeGenerationForm({ onBack }: RecipeGenerationFormProps) {
               </ol>
             </div>
           </div>
-          
+
           {/* 調理情報とコツ */}
           <div className="mt-6 pt-6 border-t">
             <div className="grid md:grid-cols-2 gap-6">
               <div>
                 <h4 className="font-semibold mb-2">調理情報</h4>
                 <p className="text-sm text-gray-600">
-                  調理時間: {result.mainRecipe.cookingTime}分<br />
-                  難易度: {result.mainRecipe.difficulty}<br />
-                  地方: {result.mainRecipe.region || 'イタリア全土'}
+                  調理時間: {recipeData.mainRecipe.cookingTime}分<br />
+                  難易度: {recipeData.mainRecipe.difficulty}<br />
+                  地方: {recipeData.mainRecipe.region || 'イタリア全土'}
                 </p>
-                {result.mainRecipe.wine_pairing && (
+                {recipeData.mainRecipe.wine_pairing && (
                   <p className="text-sm text-gray-600 mt-2">
-                    おすすめワイン: {result.mainRecipe.wine_pairing}
+                    おすすめワイン: {recipeData.mainRecipe.wine_pairing}
                   </p>
                 )}
               </div>
-              
+
               <div>
                 <h4 className="font-semibold mb-2">調理のコツ</h4>
                 <ul className="space-y-1">
-                  {result.mainRecipe.tips.map((tip, index) => (
+                  {recipeData.mainRecipe.tips.map((tip: string, index: number) => (
                     <li key={index} className="text-sm text-gray-600">
                       • {tip}
                     </li>
@@ -132,11 +173,11 @@ export function RecipeGenerationForm({ onBack }: RecipeGenerationFormProps) {
         </div>
 
         {/* バリエーション */}
-        {result.variations && result.variations.length > 0 && (
+        {recipeData.variations && recipeData.variations.length > 0 && (
           <div className="bg-gray-50 rounded-lg p-6">
             <h3 className="text-lg font-bold mb-4">アレンジレシピ</h3>
             <div className="space-y-4">
-              {result.variations.map((variation, index) => (
+              {recipeData.variations.map((variation: any, index: number) => (
                 <div key={index} className="bg-white rounded p-4">
                   <h4 className="font-semibold text-italian-green mb-2">
                     {variation.variationName}
@@ -149,7 +190,7 @@ export function RecipeGenerationForm({ onBack }: RecipeGenerationFormProps) {
                     <div>
                       <h5 className="font-medium mb-1">食材の変更:</h5>
                       <ul className="text-sm space-y-1">
-                        {variation.substitutions.map((sub, subIndex) => (
+                        {variation.substitutions.map((sub: any, subIndex: number) => (
                           <li key={subIndex} className="text-gray-600">
                             {sub.original} → {sub.replacement} ({sub.reason})
                           </li>
@@ -159,6 +200,38 @@ export function RecipeGenerationForm({ onBack }: RecipeGenerationFormProps) {
                   )}
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* 食材分析 */}
+        {recipeData.ingredientAnalysis && (
+          <div className="bg-blue-50 rounded-lg p-6 mt-6">
+            <h3 className="text-lg font-bold mb-4">食材分析</h3>
+            <div className="grid md:grid-cols-2 gap-6">
+              <div>
+                <h4 className="font-semibold mb-2">相性度: {recipeData.ingredientAnalysis.compatibility}</h4>
+                <p className="text-sm text-gray-600 mb-3">
+                  難易度評価: {recipeData.ingredientAnalysis.difficultyAssessment}
+                </p>
+                <h5 className="font-medium mb-1">推奨料理タイプ:</h5>
+                <ul className="text-sm space-y-1">
+                  {recipeData.ingredientAnalysis.suggestedDishTypes.map((type: string, index: number) => (
+                    <li key={index} className="text-gray-600">• {type}</li>
+                  ))}
+                </ul>
+              </div>
+              
+              <div>
+                <h5 className="font-medium mb-1">おすすめ追加食材:</h5>
+                <ul className="text-sm space-y-1">
+                  {recipeData.ingredientAnalysis.recommendedAdditions.map((addition: any, index: number) => (
+                    <li key={index} className="text-gray-600">
+                      • {addition.ingredient} - {addition.reason} (優先度: {addition.priority})
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
           </div>
         )}

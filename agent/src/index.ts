@@ -11,7 +11,6 @@ import {
 import { expenseApprovalWorkflow, italianRecipeWorkflow } from "./workflows";
 import { z } from "zod";
 
-// Create a logger instance
 const logger = createPinoLogger({
 	name: "italian-recipe-agent",
 	level: "info",
@@ -41,6 +40,7 @@ const italianRecipeAgent = new Agent({
     家庭料理に適した詳細で分かりやすい手順を提供してください。
 
     入力されたレシピリクエストを解析し、JSON形式でレシピを返してください。
+
     レスポンス形式：
     {
       "mainRecipe": {

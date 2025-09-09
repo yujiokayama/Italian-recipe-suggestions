@@ -1,12 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import type { RecipeRequest, RecipeResponse } from '@/types'
+import type { RecipeRequest, VoltAgentResponse } from '@/types'
 
 interface UseRecipeGenerationReturn {
   generateRecipe: (request: RecipeRequest) => Promise<void>
   isLoading: boolean
-  result: RecipeResponse | null
+  result: VoltAgentResponse | null
   error: string | null
   clearResult: () => void
   voltAgentStatus: 'unknown' | 'connected' | 'disconnected' | 'error'
@@ -15,30 +15,47 @@ interface UseRecipeGenerationReturn {
 
 export function useRecipeGeneration(): UseRecipeGenerationReturn {
   const [isLoading, setIsLoading] = useState(false)
-  const [result, setResult] = useState<RecipeResponse | null>(null)
+  const [result, setResult] = useState<VoltAgentResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [voltAgentStatus, setVoltAgentStatus] = useState<'unknown' | 'connected' | 'disconnected' | 'error'>('unknown')
 
   const generateRecipe = async (request: RecipeRequest) => {
     setIsLoading(true)
     setError(null)
-    
+
     try {
-      const response = await fetch('/api/recipe/generate', {
-        method: 'POST',
+      console.log('Sending recipe request:', request)
+
+      const response = await fetch('http://localhost:3141/agents/italian-recipe-chef/text',       {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          accept: "application/json",
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(request),
+        body: JSON.stringify({
+          input: 'カニクリームコロッケのレシピを教えてください',
+          options: {
+            userId: "unique-user-id",
+            conversationId: "unique-conversation-id",
+            contextLimit: 10,
+            temperature: 0.7,
+            maxTokens: 100,
+          },
+        }),
       })
 
+      console.log('Response status:', response.status)
+
       if (!response.ok) {
+        const errorText = await response.text()
+        console.error('API error response:', errorText)
         throw new Error(`レシピ生成に失敗しました: ${response.statusText}`)
       }
 
       const data = await response.json()
+      console.log('Received recipe data:', data)
       setResult(data)
-      
+
       // レスポンスのメタデータからエージェントの使用状況を確認
       if (data.metadata?.agent_used === 'voltagent') {
         setVoltAgentStatus('connected')
@@ -46,6 +63,7 @@ export function useRecipeGeneration(): UseRecipeGenerationReturn {
         setVoltAgentStatus('disconnected')
       }
     } catch (err) {
+      console.error('Recipe generation error:', err)
       setError(err instanceof Error ? err.message : 'レシピ生成に失敗しました')
       setVoltAgentStatus('error')
     } finally {

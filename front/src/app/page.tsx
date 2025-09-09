@@ -54,20 +54,22 @@ export default function HomePage() {
                 </div>
                 <h3 className="text-xl font-semibold mb-3">食材ベースレシピ生成</h3>
                 <p className="text-gray-600">
-                  冷蔵庫にある食材を入力するだけで、美味しいイタリア料理のレシピを瞬時に生成
+                  食材を入力するだけで、美味しいイタリア料理のレシピを瞬時に生成
                 </p>
               </div>
-              
+
               <div className="card text-center">
                 <div className="w-16 h-16 bg-italian-green/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl">🔄</span>
+                  <span className="text-2xl">
+                    🍕
+                  </span>
                 </div>
                 <h3 className="text-xl font-semibold mb-3">アレンジ提案</h3>
                 <p className="text-gray-600">
                   メインレシピに加えて、複数のバリエーションレシピも同時に提案
                 </p>
               </div>
-              
+
               <div className="card text-center">
                 <div className="w-16 h-16 bg-italian-red/10 rounded-full flex items-center justify-center mx-auto mb-4">
                   <span className="text-2xl">💡</span>
@@ -85,16 +87,8 @@ export default function HomePage() {
             <div className="container mx-auto px-4 text-center">
               <h2 className="text-3xl font-bold mb-4">今すぐ始めよう</h2>
               <p className="text-xl mb-8 opacity-90">
-                Buoonoくんが、本格イタリア料理のレシピを提案します!
+                Buoonoくんが、本格イタリア料理のレシピを提案します
               </p>
-              {/* <Button 
-                variant="secondary" 
-                size="lg" 
-                className="bg-white text-italian-green hover:bg-gray-100"
-                onClick={() => setShowForm(true)}
-              >
-                無料で始める
-              </Button> */}
             </div>
           </section>
         </>
@@ -107,7 +101,7 @@ export default function HomePage() {
                 イタリアンレシピ生成
               </h1>
               <p className="text-gray-600 max-w-2xl mx-auto mb-6">
-                食材を入力して、Buonoくんに本格的なイタリア料理のレシピを提案してもらいましょう!
+                食材を入力して、Buonoくんに本格的なイタリア料理のレシピを提案してもらいましょう
               </p>
               <Button 
                 variant="outline" 

@@ -113,5 +113,45 @@ export interface RecipeResponse {
     language: string
     format: string
     workflow_version: string
+    agent_used?: string
+  }
+}
+
+export interface VoltAgentResponse {
+  success: boolean
+  data: {
+    provider: {
+      steps: {
+        content: {
+          type: string
+          text: string
+          providerMetadata?: any
+        }[]
+        finishReason: string
+        usage: {
+          inputTokens: number
+          outputTokens: number
+          totalTokens: number
+          reasoningTokens: number
+          cachedInputTokens: number
+        }
+        warnings: any[]
+        request: any
+      }[]
+    }
+    text: string
+    usage: {
+      promptTokens: number
+      completionTokens: number
+      totalTokens: number
+      cachedInputTokens: number
+      reasoningTokens: number
+    }
+    toolCalls: any[]
+    toolResults: any[]
+    finishReason: string
+    reasoning: string
+    warnings: any[]
+    userContext: any
   }
 }

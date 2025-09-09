@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
   try {
     const body: RecipeRequest = await request.json()
     console.log('Received recipe request:', body)
-    
+
     // バリデーション
     if (!body.ingredients || body.ingredients.length === 0) {
       return NextResponse.json(
@@ -142,16 +142,7 @@ JSON形式でレシピを返してください。`
           'accept': 'application/json',
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          input: prompt,
-          options: {
-            userId: "unique-user-id",
-            conversationId: "unique-conversation-id",
-            contextLimit: 10,
-            temperature: 0.7,
-            maxTokens: 2000,
-          },
-        })
+        body: JSON.stringify(prompt)
       })
 
       console.log('VoltAgent response status:', voltAgentResponse.status)
