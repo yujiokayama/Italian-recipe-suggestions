@@ -3,6 +3,9 @@ import { VercelAIProvider } from "@voltagent/vercel-ai";
 import { openai } from "@ai-sdk/openai";
 import { z } from "zod";
 
+// Export recipe workflow
+export { italianRecipeWorkflow } from "./recipe";
+
 // ==============================================================================
 // Example: Human-in-the-Loop Expense Approval Workflow
 // Concepts: Suspend/resume and step-level schemas
