@@ -26,7 +26,7 @@ export default function HomePage() {
                 className="mx-auto mb-8" 
               />
               <p className="text-xl text-gray-600 leading-relaxed mb-10">
-                手持ちの食材を入力するだけで、AIがあなたにぴったりの
+                食材を入力するだけで、Buonoくんがあなたにぴったりの
                 <br className="hidden md:block" />
                 本格イタリア料理レシピを瞬時に提案します
               </p>
@@ -107,7 +107,7 @@ export default function HomePage() {
                 イタリアンレシピ生成
               </h1>
               <p className="text-gray-600 max-w-2xl mx-auto mb-6">
-                食材を入力して、Buonoくんに本格的なイタリア料理のレシピを提案してもらいましょう
+                食材を入力して、Buonoくんに本格的なイタリア料理のレシピを提案してもらいましょう!
               </p>
               <Button 
                 variant="outline" 
