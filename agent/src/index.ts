@@ -9,6 +9,7 @@ import {
 	recipeVariationTool,
 } from "./tools";
 import { expenseApprovalWorkflow, italianRecipeWorkflow } from "./workflows";
+import { z } from "zod";
 
 // Create a logger instance
 const logger = createPinoLogger({
@@ -38,10 +39,10 @@ const italianRecipeAgent = new Agent({
 
     常に本格性を保ちながら、食材の組み合わせに創造性を発揮してください。
     家庭料理に適した詳細で分かりやすい手順を提供してください。
-
-    **重要：すべてのレスポンスはJSON形式で返してください。**
-    レシピ情報、分析結果、提案などはすべて構造化されたJSONオブジェクトとして出力してください。
   `,
+	parameters: z.object({
+		prompt: z.string().describe("ユーザーからの入力プロンプト"),
+	}),
 	llm: new VercelAIProvider(),
 	model: openai("gpt-4o-mini"),
 	tools: [italianRecipeTool, recipeVariationTool, ingredientAnalysisTool],
