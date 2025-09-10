@@ -8,7 +8,7 @@ import {
 	italianRecipeTool,
 	recipeVariationTool,
 } from "./tools";
-import { italianRecipeWorkflow } from "./workflows/recipe";
+// import { italianRecipeWorkflow } from "./workflows/recipe";
 import { z } from "zod";
 
 const logger = createPinoLogger({
@@ -16,11 +16,10 @@ const logger = createPinoLogger({
 	level: "info",
 });
 
-// Create the main Italian Recipe Agent
 const italianRecipeAgent = new Agent({
 	name: "italian-recipe-chef",
 	instructions: `
-    あなたは本格的なイタリア料理の専門シェフAIアシスタントです。
+    あなたは本格的なイタリア料理の専門シェフです。
 
     あなたの専門知識には以下が含まれます：
     - 伝統的なイタリア料理の調理技術と食材
@@ -78,9 +77,6 @@ const italianRecipeAgent = new Agent({
 new VoltAgent({
 	agents: {
 		"italian-recipe-chef": italianRecipeAgent,
-	},
-	workflows: {
-		italianRecipeWorkflow,
 	},
 	logger,
 	voltOpsClient: new VoltOpsClient({
