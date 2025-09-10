@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { SteamAnimation } from '@/components/ui/SteamAnimation'
 import { useRecipeGeneration } from '@/hooks/useRecipeGeneration'
-import type { NewRecipeRequest, RecipeResponse } from '@/types'
+import type { NewRecipeRequest, RecipeResponse, RecipeVariationType } from '@/types'
+import { RECIPE_VARIATIONS, VARIATION_NAMES } from '@/types'
 import Image from 'next/image'
 
 interface RecipeGenerationFormProps {
@@ -19,6 +20,7 @@ export function RecipeGenerationForm({ onBack, onRecipeGenerated }: RecipeGenera
   const [cookingTime, setCookingTime] = useState<number>(30)
   const [servings, setServings] = useState<number>(2)
   const [includeVariations, setIncludeVariations] = useState<boolean>(true)
+  const [requestedVariations, setRequestedVariations] = useState<RecipeVariationType[]>(['vegetarian'])
   const [showSteamAnimation, setShowSteamAnimation] = useState<boolean>(false)
   const [justGenerated, setJustGenerated] = useState<boolean>(false)
   
@@ -37,6 +39,14 @@ export function RecipeGenerationForm({ onBack, onRecipeGenerated }: RecipeGenera
   const removeIngredient = (index: number) => {
     if (ingredients.length > 1) {
       setIngredients(ingredients.filter((_, i) => i !== index))
+    }
+  }
+
+  const handleVariationChange = (variation: RecipeVariationType, checked: boolean) => {
+    if (checked) {
+      setRequestedVariations(prev => [...prev, variation])
+    } else {
+      setRequestedVariations(prev => prev.filter(v => v !== variation))
     }
   }
 
@@ -64,7 +74,7 @@ export function RecipeGenerationForm({ onBack, onRecipeGenerated }: RecipeGenera
       {
         type: "variations" as const,
         includeVariations,
-        requestedVariations: includeVariations ? ['vegetarian'] : []
+        requestedVariations: includeVariations ? requestedVariations : []
       }
     ]
 
@@ -384,10 +394,38 @@ export function RecipeGenerationForm({ onBack, onRecipeGenerated }: RecipeGenera
               className="mr-2"
             />
             <label htmlFor="includeVariations" className="text-sm font-medium text-gray-700">
-              アレンジレシピも生成
+              アレンジレシピで生成
             </label>
           </div>
         </div>
+
+        {/* バリエーション選択UI */}
+        {includeVariations && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              生成するバリエーション（複数選択可）
+            </label>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {RECIPE_VARIATIONS.map((variation) => (
+                <div key={variation} className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id={`variation-${variation}`}
+                    checked={requestedVariations.includes(variation)}
+                    onChange={(e) => handleVariationChange(variation, e.target.checked)}
+                    className="mr-2"
+                  />
+                  <label 
+                    htmlFor={`variation-${variation}`} 
+                    className="text-sm text-gray-700 cursor-pointer"
+                  >
+                    {VARIATION_NAMES[variation]}
+                  </label>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-md p-3">

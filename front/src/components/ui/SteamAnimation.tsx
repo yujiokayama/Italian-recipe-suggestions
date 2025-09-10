@@ -101,7 +101,7 @@ export function SteamAnimation({
         <div className="mt-6 text-center animate-fade-in-up" style={{ animationDelay: '0.5s', animationFillMode: 'both' }}>
           <div className="bg-white/95 rounded-lg shadow-lg p-4 max-w-sm mx-auto">
             <h3 className="text-xl font-bold text-italian-red mb-1">
-              🍝 Buonissimo! 🍝
+              Buonissimo!
             </h3>
             <p className="text-gray-600 text-sm">
               美味しいレシピが完成しました！

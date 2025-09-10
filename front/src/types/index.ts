@@ -1,3 +1,24 @@
+// バリエーションタイプの定数定義（agentと同期）
+export const RECIPE_VARIATIONS = [
+	"vegetarian",
+	"vegan", 
+	"gluten-free",
+	"spicy",
+	"creamy",
+	"light",
+] as const;
+
+export type RecipeVariationType = typeof RECIPE_VARIATIONS[number];
+
+export const VARIATION_NAMES: Record<RecipeVariationType, string> = {
+	vegetarian: "ベジタリアン",
+	vegan: "ビーガン",
+	"gluten-free": "グルテンフリー",
+	spicy: "スパイシー",
+	creamy: "クリーミー",
+	light: "ライト",
+};
+
 export interface User {
   id: string
   email: string

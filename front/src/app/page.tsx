@@ -110,13 +110,6 @@ export default function HomePage() {
         /* レシピ生成フォーム表示 */
         <div className="bg-gray-50 min-h-screen">
           <div className="container mx-auto px-4">
-            {!hasRecipe && (
-              <div className="text-center mb-8">
-                <p className="text-gray-600 max-w-2xl mx-auto mb-6">
-                  食材を入力して、Buonoくんに本格的なイタリア料理のレシピを提案してもらいましょう!
-                </p>
-              </div>
-            )}
             <RecipeGenerationForm 
               onBack={() => {
                 setShowForm(false)

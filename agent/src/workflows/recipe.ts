@@ -1,6 +1,27 @@
 import { createWorkflowChain } from "@voltagent/core";
 import { z } from "zod";
 
+// バリエーションタイプの定数定義
+export const RECIPE_VARIATIONS = [
+	"vegetarian",
+	"vegan", 
+	"gluten-free",
+	"spicy",
+	"creamy",
+	"light",
+] as const;
+
+export type RecipeVariationType = typeof RECIPE_VARIATIONS[number];
+
+export const VARIATION_NAMES: Record<RecipeVariationType, string> = {
+	vegetarian: "ベジタリアン",
+	vegan: "ビーガン",
+	"gluten-free": "グルテンフリー",
+	spicy: "スパイシー",
+	creamy: "クリーミー",
+	light: "ライト",
+};
+
 // ==============================================================================
 // Italian Recipe Generation Workflow
 // This workflow handles the complete process of generating Italian recipes
@@ -79,16 +100,7 @@ export const italianRecipeWorkflow = createWorkflowChain({
 			.default({}),
 		includeVariations: z.boolean().optional().default(true),
 		requestedVariations: z
-			.array(
-				z.enum([
-					"vegetarian",
-					"vegan",
-					"gluten-free",
-					"spicy",
-					"creamy",
-					"light",
-				]),
-			)
+			.array(z.enum(RECIPE_VARIATIONS))
 			.optional()
 			.default([]),
 	}),
@@ -217,21 +229,15 @@ export const italianRecipeWorkflow = createWorkflowChain({
 				`レシピバリエーションを生成中: ${data.requestedVariations?.join("、") || "デフォルトバリエーション"}`,
 			);
 
-			const variationsToGenerate =
+			const variationsToGenerate: RecipeVariationType[] =
 				data.requestedVariations && data.requestedVariations.length > 0
 					? data.requestedVariations
 					: ["vegetarian", "light"]; // デフォルトバリエーション
 
-			const variationNames: Record<string, string> = {
-				vegetarian: "ベジタリアン",
-				vegan: "ビーガン",
-				"gluten-free": "グルテンフリー",
-				spicy: "スパイシー",
-				creamy: "クリーミー",
-				light: "ライト",
-			};
+			// 新しく定義した定数を使用
+			const variationNames = VARIATION_NAMES;
 
-			const variations = variationsToGenerate.map((variationType) => ({
+			const variations = variationsToGenerate.map((variationType: RecipeVariationType) => ({
 				variationName: `${data.mainRecipe.recipeName}（${variationNames[variationType] || variationType}）`,
 				modificationType: variationNames[variationType] || variationType,
 				ingredients: data.mainRecipe.ingredients.map((ingredient) => ({
