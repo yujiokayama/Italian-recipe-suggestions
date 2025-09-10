@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useRecipeGeneration } from '@/hooks/useRecipeGeneration'
 import type { NewRecipeRequest, RecipeResponse } from '@/types'
+import Image from 'next/image'
 
 interface RecipeGenerationFormProps {
   onBack?: () => void
@@ -90,6 +91,36 @@ export function RecipeGenerationForm({ onBack }: RecipeGenerationFormProps) {
 
   const recipeData = getRecipeData()
 
+  // ローディング状態の表示
+  if (isLoading) {
+    return (
+      <div className="max-w-2xl mx-auto p-6">
+        <div className="text-center">
+          <Image 
+            src="/images/buono-kun-recipe-think.png" 
+            alt="考え中のBuonoくん" 
+            width={300}
+            height={300}
+            className="mx-auto mb-6" 
+          />
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            レシピを考え中...
+          </h2>
+          <p className="text-gray-600 mb-6">
+            Buonoくんが美味しいイタリア料理のレシピを考えています
+          </p>
+          <div className="animate-pulse">
+            <div className="flex justify-center space-x-1">
+              <div className="w-2 h-2 bg-italian-red rounded-full animate-bounce"></div>
+              <div className="w-2 h-2 bg-italian-red rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+              <div className="w-2 h-2 bg-italian-red rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   if (recipeData) {
     return (
       <div className="max-w-4xl mx-auto p-6">
@@ -102,14 +133,6 @@ export function RecipeGenerationForm({ onBack }: RecipeGenerationFormProps) {
             >
               新しいレシピを生成
             </Button>
-            {onBack && (
-              <Button
-                variant="outline"
-                onClick={onBack}
-              >
-                戻る
-              </Button>
-            )}
           </div>
         </div>
 
