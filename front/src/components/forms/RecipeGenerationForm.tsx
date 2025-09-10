@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { SteamAnimation } from '@/components/ui/SteamAnimation'
 import { useRecipeGeneration } from '@/hooks/useRecipeGeneration'
 import type { NewRecipeRequest, RecipeResponse } from '@/types'
 import Image from 'next/image'
@@ -18,6 +19,8 @@ export function RecipeGenerationForm({ onBack, onRecipeGenerated }: RecipeGenera
   const [cookingTime, setCookingTime] = useState<number>(30)
   const [servings, setServings] = useState<number>(2)
   const [includeVariations, setIncludeVariations] = useState<boolean>(true)
+  const [showSteamAnimation, setShowSteamAnimation] = useState<boolean>(false)
+  const [justGenerated, setJustGenerated] = useState<boolean>(false)
   
   const { generateRecipe, isLoading, result, error, clearResult, voltAgentStatus, checkVoltAgentStatus } = useRecipeGeneration()
 
@@ -92,12 +95,33 @@ export function RecipeGenerationForm({ onBack, onRecipeGenerated }: RecipeGenera
 
   const recipeData = getRecipeData()
 
-  // レシピ生成状態を親コンポーネントに通知
+  // レシピ生成状態を親コンポーネントに通知 & 湯気アニメーション制御
   useEffect(() => {
     if (onRecipeGenerated) {
       onRecipeGenerated(!!recipeData)
     }
-  }, [recipeData, onRecipeGenerated])
+    
+    // レシピが新しく生成された時に湯気アニメーションを表示
+    if (recipeData && !justGenerated) {
+      setShowSteamAnimation(true)
+      setJustGenerated(true)
+    }
+  }, [recipeData, onRecipeGenerated, justGenerated])
+
+  // 湯気アニメーション完了時の処理
+  const handleSteamAnimationComplete = () => {
+    setShowSteamAnimation(false)
+  }
+
+  // 新しいレシピ生成時の状態リセット
+  const handleNewRecipe = () => {
+    clearResult()
+    setJustGenerated(false)
+    setShowSteamAnimation(false)
+    if (onRecipeGenerated) {
+      onRecipeGenerated(false)
+    }
+  }
 
   // ローディング状態の表示
   if (isLoading) {
@@ -114,9 +138,6 @@ export function RecipeGenerationForm({ onBack, onRecipeGenerated }: RecipeGenera
           <h2 className="text-2xl font-bold text-gray-900 mb-4">
             レシピを考え中...
           </h2>
-          <p className="text-gray-600 mb-6">
-            Buonoくんが美味しいイタリア料理のレシピを考えています
-          </p>
           <div className="animate-pulse">
             <div className="flex justify-center space-x-1">
               <div className="w-2 h-2 bg-italian-red rounded-full animate-bounce"></div>
@@ -131,23 +152,26 @@ export function RecipeGenerationForm({ onBack, onRecipeGenerated }: RecipeGenera
 
   if (recipeData) {
     return (
-      <div className="max-w-4xl mx-auto p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">生成されたレシピ</h2>
-          <div className="space-x-2">
-            <Button
-              variant="outline"
-              onClick={() => {
-                clearResult()
-                if (onRecipeGenerated) {
-                  onRecipeGenerated(false)
-                }
-              }}
-            >
-              新しいレシピを生成
-            </Button>
+      <>
+        {/* 湯気アニメーション */}
+        <SteamAnimation 
+          isVisible={showSteamAnimation}
+          onAnimationComplete={handleSteamAnimationComplete}
+          duration={3000}
+        />
+        
+        <div className="max-w-4xl mx-auto p-6">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold text-gray-900">生成されたレシピ</h2>
+            <div className="space-x-2">
+              <Button
+                variant="outline"
+                onClick={handleNewRecipe}
+              >
+                新しいレシピを生成
+              </Button>
+            </div>
           </div>
-        </div>
 
         {/* メインレシピ */}
         <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
@@ -276,7 +300,8 @@ export function RecipeGenerationForm({ onBack, onRecipeGenerated }: RecipeGenera
             </div>
           </div>
         )}
-      </div>
+        </div>
+      </>
     )
   }
 

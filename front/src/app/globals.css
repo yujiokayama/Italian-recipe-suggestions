@@ -29,3 +29,40 @@
     @apply w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-italian-red focus:border-transparent;
   }
 }
+
+@layer utilities {
+  /* 湯気アニメーション */
+  @keyframes steam {
+    0% {
+      transform: translateY(0) scale(1);
+      opacity: 0.7;
+    }
+    50% {
+      transform: translateY(-30px) scale(1.2);
+      opacity: 0.9;
+    }
+    100% {
+      transform: translateY(-60px) scale(1.5);
+      opacity: 0;
+    }
+  }
+
+  @keyframes fade-in-up {
+    0% {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .steam-particle {
+    animation: steam infinite ease-out;
+  }
+
+  .animate-fade-in-up {
+    animation: fade-in-up 0.8s ease-out;
+  }
+}
