@@ -45,52 +45,112 @@ export function SteamAnimation({
           />
           
           {/* 湯気のアニメーション - Buonoくんの上部に表示 */}
-          <div className="absolute -top-16 left-1/2 transform -translate-x-1/2 w-48 h-32">
-            {/* 大きな湯気パーティクル */}
-            {Array.from({ length: 5 }).map((_, index) => (
+          <div className="absolute -top-20 left-1/2 transform -translate-x-1/2 w-56 h-40">
+            {/* 特大湯気パーティクル */}
+            {Array.from({ length: 3 }).map((_, index) => (
               <div
-                key={`steam-large-${index}`}
-                className="absolute w-6 h-6 bg-white/90 rounded-full"
+                key={`steam-xlarge-${index}`}
+                className="absolute w-8 h-8 bg-white/95 rounded-full blur-sm"
                 style={{
-                  left: `${35 + Math.sin(index * 1.256) * 25}%`,
+                  left: `${40 + Math.sin(index * 2.094) * 20}%`,
                   bottom: '0%',
-                  animation: `steam-large 2.5s infinite ease-out ${index * 0.4}s`,
+                  animation: `steam-xlarge 3.5s infinite ease-out ${index * 0.6}s`,
                 }}
               />
             ))}
-            {/* 中サイズの湯気パーティクル */}
+            {/* 大きな湯気パーティクル */}
             {Array.from({ length: 8 }).map((_, index) => (
               <div
-                key={`steam-medium-${index}`}
-                className="absolute w-4 h-4 bg-white/80 rounded-full"
+                key={`steam-large-${index}`}
+                className="absolute w-6 h-6 bg-white/90 rounded-full blur-sm"
                 style={{
-                  left: `${30 + Math.sin(index * 0.785) * 30}%`,
-                  bottom: '15%',
-                  animation: `steam-medium 2s infinite ease-out ${index * 0.25 + 0.2}s`,
+                  left: `${35 + Math.sin(index * 1.256) * 30}%`,
+                  bottom: '5%',
+                  animation: `steam-large 3s infinite ease-out ${index * 0.3}s`,
                 }}
               />
             ))}
-            {/* 小さな湯気パーティクル */}
+            {/* 中サイズの湯気パーティクル（層1） */}
             {Array.from({ length: 12 }).map((_, index) => (
               <div
-                key={`steam-small-${index}`}
-                className="absolute w-3 h-3 bg-white/70 rounded-full"
+                key={`steam-medium-1-${index}`}
+                className="absolute w-4 h-4 bg-white/85 rounded-full blur-sm"
                 style={{
-                  left: `${25 + Math.sin(index * 0.524) * 35}%`,
-                  bottom: '30%',
-                  animation: `steam-small 1.5s infinite ease-out ${index * 0.15 + 0.5}s`,
+                  left: `${25 + Math.sin(index * 0.785) * 35}%`,
+                  bottom: '15%',
+                  animation: `steam-medium 2.5s infinite ease-out ${index * 0.2 + 0.1}s`,
                 }}
               />
             ))}
-            {/* 微細な湯気パーティクル */}
+            {/* 中サイズの湯気パーティクル（層2） */}
+            {Array.from({ length: 10 }).map((_, index) => (
+              <div
+                key={`steam-medium-2-${index}`}
+                className="absolute w-5 h-5 bg-white/80 rounded-full blur-sm"
+                style={{
+                  left: `${30 + Math.cos(index * 0.628) * 32}%`,
+                  bottom: '20%',
+                  animation: `steam-medium 2.2s infinite ease-out ${index * 0.25 + 0.3}s`,
+                }}
+              />
+            ))}
+            {/* 小さな湯気パーティクル（層1） */}
+            {Array.from({ length: 18 }).map((_, index) => (
+              <div
+                key={`steam-small-1-${index}`}
+                className="absolute w-3 h-3 bg-white/75 rounded-full"
+                style={{
+                  left: `${20 + Math.sin(index * 0.349) * 40}%`,
+                  bottom: '30%',
+                  animation: `steam-small 2s infinite ease-out ${index * 0.12 + 0.4}s`,
+                }}
+              />
+            ))}
+            {/* 小さな湯気パーティクル（層2） */}
             {Array.from({ length: 15 }).map((_, index) => (
               <div
-                key={`steam-tiny-${index}`}
+                key={`steam-small-2-${index}`}
+                className="absolute w-3 h-3 bg-white/70 rounded-full"
+                style={{
+                  left: `${22 + Math.cos(index * 0.419) * 38}%`,
+                  bottom: '35%',
+                  animation: `steam-small 1.8s infinite ease-out ${index * 0.15 + 0.6}s`,
+                }}
+              />
+            ))}
+            {/* 微細な湯気パーティクル（層1） */}
+            {Array.from({ length: 25 }).map((_, index) => (
+              <div
+                key={`steam-tiny-1-${index}`}
+                className="absolute w-2 h-2 bg-white/65 rounded-full"
+                style={{
+                  left: `${15 + Math.sin(index * 0.251) * 45}%`,
+                  bottom: '45%',
+                  animation: `steam-tiny 1.5s infinite ease-out ${index * 0.08 + 0.7}s`,
+                }}
+              />
+            ))}
+            {/* 微細な湯気パーティクル（層2） */}
+            {Array.from({ length: 20 }).map((_, index) => (
+              <div
+                key={`steam-tiny-2-${index}`}
                 className="absolute w-2 h-2 bg-white/60 rounded-full"
                 style={{
-                  left: `${20 + Math.sin(index * 0.419) * 40}%`,
-                  bottom: '45%',
-                  animation: `steam-tiny 1.2s infinite ease-out ${index * 0.1 + 0.8}s`,
+                  left: `${18 + Math.cos(index * 0.314) * 42}%`,
+                  bottom: '50%',
+                  animation: `steam-tiny 1.3s infinite ease-out ${index * 0.1 + 0.9}s`,
+                }}
+              />
+            ))}
+            {/* 超微細な湯気パーティクル */}
+            {Array.from({ length: 30 }).map((_, index) => (
+              <div
+                key={`steam-micro-${index}`}
+                className="absolute w-1 h-1 bg-white/55 rounded-full"
+                style={{
+                  left: `${10 + Math.sin(index * 0.209) * 50}%`,
+                  bottom: '55%',
+                  animation: `steam-micro 1.2s infinite ease-out ${index * 0.06 + 1.1}s`,
                 }}
               />
             ))}
