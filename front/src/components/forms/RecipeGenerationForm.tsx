@@ -135,16 +135,14 @@ export function RecipeGenerationForm({ onBack, onRecipeGenerated }: RecipeGenera
             height={300}
             className="mx-auto mb-6" 
           />
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            レシピを考え中...
-          </h2>
-          <div className="animate-pulse">
-            <div className="flex justify-center space-x-1">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-baseline justify-center gap-3">
+            <span>レシピを考え中</span>
+            <div className="flex items-baseline space-x-1">
               <div className="w-2 h-2 bg-italian-red rounded-full animate-bounce"></div>
               <div className="w-2 h-2 bg-italian-red rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
               <div className="w-2 h-2 bg-italian-red rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
             </div>
-          </div>
+          </h2>
         </div>
       </div>
     )
