@@ -49,8 +49,8 @@ export default function HomePage() {
             </h2>
             <div className="grid md:grid-cols-3 gap-8">
               <div className="card text-center">
-                <div className="w-16 h-16 bg-italian-red/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl">🍝</span>
+                <div className="w-16 h-16 bg-italian-red/10 rounded-full flex items-center justify-center mx-auto mb-4 overflow-hidden">
+                  <img src="/images/buono-kun-recipe-read.png" alt="レシピを読むBuonoくん" className="w-full h-full object-cover rounded-full" />
                 </div>
                 <h3 className="text-xl font-semibold mb-3">食材ベースレシピ生成</h3>
                 <p className="text-gray-600">
@@ -59,10 +59,8 @@ export default function HomePage() {
               </div>
 
               <div className="card text-center">
-                <div className="w-16 h-16 bg-italian-green/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl">
-                    🍕
-                  </span>
+                <div className="w-16 h-16 bg-italian-green/10 rounded-full flex items-center justify-center mx-auto mb-4 overflow-hidden">
+                  <img src="/images/buono-kun-recipe-arrange.png" alt="レシピをアレンジするBuonoくん" className="w-full h-full object-cover rounded-full" />
                 </div>
                 <h3 className="text-xl font-semibold mb-3">アレンジ提案</h3>
                 <p className="text-gray-600">
@@ -71,8 +69,8 @@ export default function HomePage() {
               </div>
 
               <div className="card text-center">
-                <div className="w-16 h-16 bg-italian-red/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl">💡</span>
+                <div className="w-16 h-16 bg-italian-red/10 rounded-full flex items-center justify-center mx-auto mb-4 overflow-hidden">
+                  <img src="/images/buono-kun-recipe-success.png" alt="レシピを成功させるBuonoくん" className="w-full h-full object-cover rounded-full" />
                 </div>
                 <h3 className="text-xl font-semibold mb-3">プロのコツ</h3>
                 <p className="text-gray-600">
