@@ -7,6 +7,7 @@ import { RecipeGenerationForm } from '@/components/forms/RecipeGenerationForm'
 
 export default function HomePage() {
   const [showForm, setShowForm] = useState(false)
+  const [hasRecipe, setHasRecipe] = useState(false)
   return (
     <main className="min-h-screen">
       {/* 共通ヘッダー */}
@@ -14,7 +15,10 @@ export default function HomePage() {
         <div className="text-center">
           <h1 
             className="md:text-5xl font-bold text-gray-900 mb-4 cursor-pointer"
-            onClick={() => setShowForm(false)}
+            onClick={() => {
+              setShowForm(false)
+              setHasRecipe(false)
+            }}
           >
             <span className='text-sm'>イタリア料理レシピ提案</span>
             <span className="block text-italian-red">Buono<span className="text-base">くん</span></span>
@@ -37,13 +41,16 @@ export default function HomePage() {
               <p className="text-xl text-gray-600 leading-relaxed mb-10">
                 食材を入力するだけで、Buonoくんがあなたにぴったりの
                 <br className="hidden md:block" />
-                本格イタリア料理レシピを瞬時に提案します
+                本格イタリア料理レシピを瞬時に提案します!
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button 
                   size="lg" 
                   className="px-8 py-4"
-                  onClick={() => setShowForm(true)}
+                  onClick={() => {
+                    setShowForm(true)
+                    setHasRecipe(false)
+                  }}
                 >
                   レシピを生成する
                 </Button>
@@ -94,21 +101,29 @@ export default function HomePage() {
             <div className="container mx-auto px-4 text-center">
               <h2 className="text-3xl font-bold mb-4">今すぐ始めよう</h2>
               <p className="text-xl mb-8 opacity-90">
-                Buoonoくんが、本格イタリア料理のレシピを提案します
+                Buoonoくんが、本格イタリア料理のレシピを提案します!
               </p>
             </div>
           </section>
         </>
       ) : (
         /* レシピ生成フォーム表示 */
-        <div className="bg-gray-50 min-h-screen py-12">
+        <div className="bg-gray-50 min-h-screen">
           <div className="container mx-auto px-4">
-            <div className="text-center mb-8">
-              <p className="text-gray-600 max-w-2xl mx-auto mb-6">
-                食材を入力して、Buonoくんに本格的なイタリア料理のレシピを提案してもらいましょう
-              </p>
-            </div>
-            <RecipeGenerationForm onBack={() => setShowForm(false)} />
+            {!hasRecipe && (
+              <div className="text-center mb-8">
+                <p className="text-gray-600 max-w-2xl mx-auto mb-6">
+                  食材を入力して、Buonoくんに本格的なイタリア料理のレシピを提案してもらいましょう!
+                </p>
+              </div>
+            )}
+            <RecipeGenerationForm 
+              onBack={() => {
+                setShowForm(false)
+                setHasRecipe(false)
+              }} 
+              onRecipeGenerated={(hasRecipe) => setHasRecipe(hasRecipe)}
+            />
           </div>
         </div>
       )}
