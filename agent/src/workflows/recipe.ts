@@ -176,7 +176,6 @@ export const italianRecipeWorkflow = createWorkflowChain({
 			);
 
 			// このステップではitalianRecipeToolを使用する
-			// 今回は、モックレシピ構造を作成する
 			const mainRecipe = {
 				recipeName: `イタリアン${data.ingredients[0]}料理`, // これはAIによって生成される
 				description: `${data.ingredients.join("、")}を使った美味しいイタリア料理`,

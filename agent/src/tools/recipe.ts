@@ -14,13 +14,13 @@ export const italianRecipeTool = createTool({
 		// ユーザーのプロンプトを解析してレシピ生成
 		const recipePrompt = `
       ${prompt}
-      
+
       以下の条件でイタリアンレシピを生成してください：
       - 本格的なイタリア料理であること
       - 正確な分量を含めること
       - ステップバイステップの手順を提供すること
       - 調理のコツを含めること
-      
+
       必須：レスポンスはJSON形式で以下の構造に従ってください：
       {
         "mainRecipe": {

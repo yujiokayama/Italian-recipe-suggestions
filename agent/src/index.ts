@@ -8,7 +8,7 @@ import {
 	italianRecipeTool,
 	recipeVariationTool,
 } from "./tools";
-import { expenseApprovalWorkflow, italianRecipeWorkflow } from "./workflows";
+import { italianRecipeWorkflow } from "./workflows/recipe";
 import { z } from "zod";
 
 const logger = createPinoLogger({
@@ -80,7 +80,6 @@ new VoltAgent({
 		"italian-recipe-chef": italianRecipeAgent,
 	},
 	workflows: {
-		expenseApprovalWorkflow,
 		italianRecipeWorkflow,
 	},
 	logger,
