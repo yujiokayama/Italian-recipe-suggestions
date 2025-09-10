@@ -37,7 +37,6 @@ export function useRecipeGeneration(): UseRecipeGenerationReturn {
 
       if (preferencesSection && 'difficulty' in preferencesSection) {
         prompt += `難易度: ${preferencesSection.difficulty}\n`
-        prompt += `調理時間: ${preferencesSection.cookingTime}分\n`
         prompt += `人数: ${preferencesSection.servings}人分\n`
       }
 
