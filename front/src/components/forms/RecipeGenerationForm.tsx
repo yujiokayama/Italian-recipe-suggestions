@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { SteamAnimation } from '@/components/ui/SteamAnimation'
 import { useRecipeGeneration } from '@/hooks/useRecipeGeneration'
-import type { NewRecipeRequest, RecipeResponse, RecipeVariationType } from '@/types'
+import type { NewRecipeRequest, RecipeResponse, RecipeVariationType, APIVariationResponse } from '@/types'
 import { RECIPE_VARIATIONS, VARIATION_NAMES } from '@/types'
 import Image from 'next/image'
 
@@ -82,41 +82,124 @@ export function RecipeGenerationForm({ onBack, onRecipeGenerated }: RecipeGenera
   }
 
   // レスポンスからレシピデータを抽出する関数
-  const getRecipeData = (): RecipeResponse | null => {
+  const getRecipeData = (): APIVariationResponse | RecipeResponse | null => {
     if (!result) return null
     
     try {
-      // result.data.provider.steps[0].content[0].text からJSONを抽出
-      const textContent = result.data?.provider?.steps?.[0]?.content?.[0]?.text
+      console.log('Processing result:', result)
+      
+      // result.data.text からJSONを直接抽出する場合
+      let textContent = result.data?.text
 
-      if (!textContent) return null
+      // または result.data.provider.steps の最後のステップから抽出
+      if (!textContent) {
+        const steps = result.data?.provider?.steps
+        if (steps && steps.length > 0) {
+          const lastStep = steps[steps.length - 1]
+          const content = lastStep?.content
+          if (content && content.length > 0) {
+            textContent = content[content.length - 1]?.text || textContent
+          }
+        }
+      }
+
+      if (!textContent) {
+        console.log('No text content found in result:', result)
+        return null
+      }
+
+      console.log('Extracted text content preview:', textContent.substring(0, 500))
 
       // JSONブロックを抽出（```json ... ``` の形式）
-      const jsonMatch = textContent.match(/```json\n([\s\S]*?)\n```/)
-      if (!jsonMatch) return null
+      const jsonMatch = textContent.match(/```json\s*\n([\s\S]*?)\n\s*```/)
+      if (jsonMatch) {
+        const jsonStr = jsonMatch[1].trim()
+        console.log('Extracted JSON string:', jsonStr.substring(0, 300))
+        const parsed = JSON.parse(jsonStr)
+        
+        // バリエーションレスポンスか通常のレシピレスポンスかを判定
+        if (parsed.variationName) {
+          return parsed as APIVariationResponse
+        } else if (parsed.mainRecipe) {
+          return parsed as RecipeResponse
+        } else {
+          console.log('Unknown JSON structure:', Object.keys(parsed))
+          return parsed
+        }
+      }
 
-      return JSON.parse(jsonMatch[1]) as RecipeResponse
+      // 直接JSONとして解析を試行
+      if (textContent.trim().startsWith('{')) {
+        const parsed = JSON.parse(textContent)
+        if (parsed.variationName) {
+          return parsed as APIVariationResponse
+        } else if (parsed.mainRecipe) {
+          return parsed as RecipeResponse
+        } else {
+          return parsed
+        }
+      }
+
+      console.log('No JSON found in text content')
+      return null
     } catch (error) {
       console.error('Recipe data parsing error:', error)
-
+      console.error('Error details:', error)
       return null
     }
   }
 
   const recipeData = getRecipeData()
 
+  // バリエーションレスポンスかどうかをチェック
+  const isVariationResponse = (data: any): data is APIVariationResponse => {
+    return data && 'variationName' in data && !('mainRecipe' in data)
+  }
+
+  // 表示用のレシピデータを正規化
+  const getDisplayRecipe = () => {
+    if (!recipeData) return null
+    
+    if (isVariationResponse(recipeData)) {
+      // バリエーションレスポンスの場合、mainRecipe形式に変換
+      return {
+        mainRecipe: {
+          recipeName: recipeData.variationName,
+          description: `${recipeData.originalRecipe}の${recipeData.modificationType}バージョン`,
+          ingredients: recipeData.ingredients,
+          instructions: recipeData.instructions,
+          cookingTime: recipeData.cookingTime,
+          difficulty: recipeData.difficulty,
+          servings: 2, // デフォルト値
+          tips: [], // バリエーションレスポンスにはtipsがない場合
+          cuisine: recipeData.cuisine,
+          region: undefined, // バリエーションレスポンスにはregionがない
+          wine_pairing: undefined // バリエーションレスポンスにはwine_pairingがない
+        },
+        variations: [],
+        ingredientAnalysis: undefined,
+        substitutions: recipeData.substitutions,
+        nutritionalBenefits: recipeData.nutritionalBenefits
+      }
+    } else {
+      return recipeData as RecipeResponse
+    }
+  }
+
+  const displayRecipe = getDisplayRecipe()
+
   // レシピ生成状態を親コンポーネントに通知 & 湯気アニメーション制御
   useEffect(() => {
     if (onRecipeGenerated) {
-      onRecipeGenerated(!!recipeData)
+      onRecipeGenerated(!!displayRecipe)
     }
     
     // レシピが新しく生成された時に湯気アニメーションを表示
-    if (recipeData && !justGenerated) {
+    if (displayRecipe && !justGenerated) {
       setShowSteamAnimation(true)
       setJustGenerated(true)
     }
-  }, [recipeData, onRecipeGenerated, justGenerated])
+  }, [displayRecipe, onRecipeGenerated, justGenerated])
 
   // 湯気アニメーション完了時の処理
   const handleSteamAnimationComplete = () => {
@@ -158,7 +241,7 @@ export function RecipeGenerationForm({ onBack, onRecipeGenerated }: RecipeGenera
     )
   }
 
-  if (recipeData) {
+  if (displayRecipe) {
     return (
       <>
         {/* 湯気アニメーション */}
@@ -184,16 +267,16 @@ export function RecipeGenerationForm({ onBack, onRecipeGenerated }: RecipeGenera
         {/* メインレシピ */}
         <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
           <h3 className="text-xl font-bold text-italian-red mb-2">
-            {recipeData.mainRecipe.recipeName}
+            {displayRecipe.mainRecipe.recipeName}
           </h3>
-          <p className="text-gray-600 mb-4">{recipeData.mainRecipe.description}</p>
+          <p className="text-gray-600 mb-4">{displayRecipe.mainRecipe.description}</p>
 
           <div className="grid md:grid-cols-2 gap-6">
             {/* 食材 */}
             <div>
-              <h4 className="font-semibold mb-3">食材 ({recipeData.mainRecipe.servings}人分)</h4>
+              <h4 className="font-semibold mb-3">食材 ({displayRecipe.mainRecipe.servings}人分)</h4>
               <ul className="space-y-1">
-                {recipeData.mainRecipe.ingredients.map((ingredient: any, index: number) => (
+                {displayRecipe.mainRecipe.ingredients.map((ingredient: any, index: number) => (
                   <li key={index} className="text-sm">
                     {ingredient.name}: {ingredient.amount} {ingredient.unit}
                   </li>
@@ -205,7 +288,7 @@ export function RecipeGenerationForm({ onBack, onRecipeGenerated }: RecipeGenera
             <div>
               <h4 className="font-semibold mb-3">作り方</h4>
               <ol className="space-y-2">
-                {recipeData.mainRecipe.instructions.map((instruction: string, index: number) => (
+                {displayRecipe.mainRecipe.instructions.map((instruction: string, index: number) => (
                   <li key={index} className="text-sm">
                     {instruction}
                   </li>
@@ -220,13 +303,13 @@ export function RecipeGenerationForm({ onBack, onRecipeGenerated }: RecipeGenera
               <div>
                 <h4 className="font-semibold mb-2">調理情報</h4>
                 <p className="text-sm text-gray-600">
-                  調理時間: {recipeData.mainRecipe.cookingTime}分<br />
-                  難易度: {recipeData.mainRecipe.difficulty}<br />
-                  地方: {recipeData.mainRecipe.region || 'イタリア全土'}
+                  調理時間: {displayRecipe.mainRecipe.cookingTime}分<br />
+                  難易度: {displayRecipe.mainRecipe.difficulty}<br />
+                  地方: {displayRecipe.mainRecipe.region || 'イタリア全土'}
                 </p>
-                {recipeData.mainRecipe.wine_pairing && (
+                {displayRecipe.mainRecipe.wine_pairing && (
                   <p className="text-sm text-gray-600 mt-2">
-                    おすすめワイン: {recipeData.mainRecipe.wine_pairing}
+                    おすすめワイン: {displayRecipe.mainRecipe.wine_pairing}
                   </p>
                 )}
               </div>
@@ -234,23 +317,48 @@ export function RecipeGenerationForm({ onBack, onRecipeGenerated }: RecipeGenera
               <div>
                 <h4 className="font-semibold mb-2">調理のコツ</h4>
                 <ul className="space-y-1">
-                  {recipeData.mainRecipe.tips.map((tip: string, index: number) => (
+                  {displayRecipe.mainRecipe.tips?.map((tip: string, index: number) => (
                     <li key={index} className="text-sm text-gray-600">
                       • {tip}
                     </li>
-                  ))}
+                  )) || <li className="text-sm text-gray-600">特になし</li>}
                 </ul>
               </div>
             </div>
           </div>
         </div>
 
-        {/* バリエーション */}
-        {recipeData.variations && recipeData.variations.length > 0 && (
+        {/* バリエーション情報（バリエーションレスポンスの場合） */}
+        {isVariationResponse(recipeData) && displayRecipe && 'substitutions' in displayRecipe && displayRecipe.substitutions && displayRecipe.substitutions.length > 0 && (
+          <div className="bg-gray-50 rounded-lg p-6">
+            <h3 className="text-lg font-bold mb-4">このバリエーションについて</h3>
+            <div className="bg-white rounded p-4">
+              <h4 className="font-semibold text-italian-green mb-2">
+                食材の変更点
+              </h4>
+              <ul className="text-sm space-y-1">
+                {displayRecipe.substitutions.map((sub: any, subIndex: number) => (
+                  <li key={subIndex} className="text-gray-600">
+                    {sub.original} → {sub.replacement} ({sub.reason})
+                  </li>
+                ))}
+              </ul>
+              {displayRecipe.nutritionalBenefits && (
+                <div className="mt-3">
+                  <h5 className="font-medium mb-1">栄養面での利点:</h5>
+                  <p className="text-sm text-gray-600">{displayRecipe.nutritionalBenefits}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* バリエーション（通常のレシピレスポンスの場合） */}
+        {!isVariationResponse(recipeData) && displayRecipe.variations && displayRecipe.variations.length > 0 && (
           <div className="bg-gray-50 rounded-lg p-6">
             <h3 className="text-lg font-bold mb-4">アレンジレシピ</h3>
             <div className="space-y-4">
-              {recipeData.variations.map((variation: any, index: number) => (
+              {displayRecipe.variations.map((variation: any, index: number) => (
                 <div key={index} className="bg-white rounded p-4">
                   <h4 className="font-semibold text-italian-green mb-2">
                     {variation.variationName}
@@ -259,7 +367,7 @@ export function RecipeGenerationForm({ onBack, onRecipeGenerated }: RecipeGenera
                     タイプ: {variation.modificationType}
                   </p>
                   
-                  {variation.substitutions.length > 0 && (
+                  {variation.substitutions && variation.substitutions.length > 0 && (
                     <div>
                       <h5 className="font-medium mb-1">食材の変更:</h5>
                       <ul className="text-sm space-y-1">
@@ -278,18 +386,19 @@ export function RecipeGenerationForm({ onBack, onRecipeGenerated }: RecipeGenera
         )}
 
         {/* 食材分析 */}
-        {recipeData.ingredientAnalysis && (
+                {/* 食材分析 */}
+        {displayRecipe.ingredientAnalysis && (
           <div className="bg-blue-50 rounded-lg p-6 mt-6">
             <h3 className="text-lg font-bold mb-4">食材分析</h3>
             <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <h4 className="font-semibold mb-2">相性度: {recipeData.ingredientAnalysis.compatibility}</h4>
+                <h4 className="font-semibold mb-2">相性度: {displayRecipe.ingredientAnalysis.compatibility}</h4>
                 <p className="text-sm text-gray-600 mb-3">
-                  難易度評価: {recipeData.ingredientAnalysis.difficultyAssessment}
+                  難易度評価: {displayRecipe.ingredientAnalysis.difficultyAssessment}
                 </p>
                 <h5 className="font-medium mb-1">推奨料理タイプ:</h5>
                 <ul className="text-sm space-y-1">
-                  {recipeData.ingredientAnalysis.suggestedDishTypes.map((type: string, index: number) => (
+                  {displayRecipe.ingredientAnalysis.suggestedDishTypes.map((type: string, index: number) => (
                     <li key={index} className="text-gray-600">• {type}</li>
                   ))}
                 </ul>
@@ -298,9 +407,9 @@ export function RecipeGenerationForm({ onBack, onRecipeGenerated }: RecipeGenera
               <div>
                 <h5 className="font-medium mb-1">おすすめ追加食材:</h5>
                 <ul className="text-sm space-y-1">
-                  {recipeData.ingredientAnalysis.recommendedAdditions.map((addition: any, index: number) => (
+                  {displayRecipe.ingredientAnalysis.recommendedAdditions.map((addition: any, index: number) => (
                     <li key={index} className="text-gray-600">
-                      • {addition.ingredient} - {addition.reason} (優先度: {addition.priority})
+                      • {addition.ingredient} - {addition.reason}
                     </li>
                   ))}
                 </ul>
