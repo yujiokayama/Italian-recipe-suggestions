@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 export async function GET(request: NextRequest) {
   try {
     const voltAgentUrl = process.env.VOLTAGENT_URL || 'http://localhost:3141'
-    
+
     // VoltAgentのヘルスチェック
     const response = await fetch(`${voltAgentUrl}/health`, {
       method: 'GET',

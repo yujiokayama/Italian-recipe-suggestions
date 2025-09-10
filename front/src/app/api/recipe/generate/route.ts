@@ -4,7 +4,7 @@ import type { RecipeRequest, RecipeResponse } from '@/types'
 // VoltAgentのモックレスポンス（開発用）
 function createMockResponse(request: RecipeRequest): RecipeResponse {
   const { ingredients, preferences } = request
-  
+
   return {
     mainRecipe: {
       recipeName: `${ingredients[0]}のイタリアンパスタ`,
@@ -117,7 +117,7 @@ export async function POST(request: NextRequest) {
     // VoltAgentのエンドポイントURL（localhost:3141）
     const voltAgentUrl = process.env.VOLTAGENT_URL || 'http://localhost:3141'
     console.log('VoltAgent URL:', voltAgentUrl)
-    
+
     // レシピリクエストを自然言語のプロンプトに変換
     const prompt = `以下の条件でイタリアンレシピを生成してください：
 
@@ -154,7 +154,7 @@ JSON形式でレシピを返してください。`
 
       const voltAgentResult = await voltAgentResponse.json()
       console.log('VoltAgent response:', voltAgentResult)
-      
+
       // VoltAgentからのテキストレスポンスをパース
       let parsedResult
       try {
@@ -178,9 +178,9 @@ JSON形式でレシピを返してください。`
         // テキストからJSONを抽出
         if (!parsedResult && responseText) {
           // JSONブロックを探す（```json...```または{...}）
-          const jsonMatch = responseText.match(/```json\s*([\s\S]*?)\s*```/) || 
-                           responseText.match(/(\{[\s\S]*\})/)
-          
+          const jsonMatch = responseText.match(/```json\s*([\s\S]*?)\s*```/) ||
+            responseText.match(/(\{[\s\S]*\})/)
+
           if (jsonMatch) {
             const jsonString = jsonMatch[1]
             parsedResult = JSON.parse(jsonString)
@@ -217,7 +217,7 @@ JSON形式でレシピを返してください。`
 
     } catch (voltAgentError) {
       console.error('VoltAgent request failed:', voltAgentError)
-      
+
       // VoltAgentが利用できない場合はフォールバックとしてモックレスポンスを使用
       console.log('Falling back to mock response due to VoltAgent error')
       const mockResponse = createMockResponse(body)
@@ -226,7 +226,7 @@ JSON形式でレシピを返してください。`
 
   } catch (error) {
     console.error('Recipe generation error:', error)
-    
+
     // エラー時はフォールバックとしてモックレスポンスを試行
     try {
       const body: RecipeRequest = await request.json()
