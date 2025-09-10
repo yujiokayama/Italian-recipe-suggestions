@@ -9,15 +9,24 @@ export default function HomePage() {
   const [showForm, setShowForm] = useState(false)
   return (
     <main className="min-h-screen">
+      {/* 共通ヘッダー */}
+      <header className="container mx-auto px-4 pt-10 pb-4">
+        <div className="text-center">
+          <h1 
+            className="md:text-5xl font-bold text-gray-900 mb-4 cursor-pointer"
+            onClick={() => setShowForm(false)}
+          >
+            <span className='text-sm'>イタリア料理レシピ提案</span>
+            <span className="block text-italian-red">Buono<span className="text-base">くん</span></span>
+          </h1>
+        </div>
+      </header>
+
       {!showForm ? (
         <>
           {/* ヒーローセクション */}
-          <section className="container mx-auto px-4 pt-10 pb-10">
+          <section className="container mx-auto px-4 pb-10">
             <div className="text-center max-w-4xl mx-auto">
-              <h1 className="md:text-5xl font-bold text-gray-900 mb-4">
-                <span className='text-sm'>イタリア料理レシピ提案</span>
-                <span className="block text-italian-red">Buono<span className="text-base">くん</span></span>
-              </h1>
               <Image 
                 src="/images/buono-kun.png" 
                 alt="Buonoくん" 
@@ -95,9 +104,6 @@ export default function HomePage() {
         <div className="bg-gray-50 min-h-screen py-12">
           <div className="container mx-auto px-4">
             <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-gray-900 mb-4">
-                イタリアンレシピ生成
-              </h1>
               <p className="text-gray-600 max-w-2xl mx-auto mb-6">
                 食材を入力して、Buonoくんに本格的なイタリア料理のレシピを提案してもらいましょう
               </p>
