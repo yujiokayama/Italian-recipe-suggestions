@@ -2,7 +2,7 @@ import { createTool } from "@voltagent/core";
 import { z } from "zod";
 
 /**
- * A tool for generating Italian recipes based on given ingredients
+ * レシピ生成ツール
  */
 export const italianRecipeTool = createTool({
 	name: "generateItalianRecipe",
@@ -94,7 +94,7 @@ export const italianRecipeTool = createTool({
 });
 
 /**
- * A tool for generating recipe variations/arrangements
+ * レシピバリエーション生成ツール
  */
 export const recipeVariationTool = createTool({
 	name: "generateRecipeVariations",
@@ -167,7 +167,7 @@ export const recipeVariationTool = createTool({
 });
 
 /**
- * A tool for analyzing ingredient compatibility with Italian cuisine
+ * 食材分析ツール
  */
 export const ingredientAnalysisTool = createTool({
 	name: "analyzeIngredients",
@@ -178,7 +178,7 @@ export const ingredientAnalysisTool = createTool({
 	execute: async ({ ingredients }) => {
 		const analysisPrompt = `
       以下の食材についてイタリア料理への適性を分析してください：${ingredients.join("、")}
-      
+
       以下を含む分析を提供してください：
       - 各食材の伝統的なイタリア料理での使用法
       - 食材間の相性評価
@@ -186,7 +186,7 @@ export const ingredientAnalysisTool = createTool({
       - 季節性の考慮
       - イタリア地方別のバリエーション
       - この組み合わせを補完する不足食材
-      
+
       必須：レスポンスはJSON形式で以下の構造に従ってください：
       {
         "ingredientAnalysis": [

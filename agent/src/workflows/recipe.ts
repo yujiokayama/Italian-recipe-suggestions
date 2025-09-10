@@ -22,51 +22,6 @@ export const VARIATION_NAMES: Record<RecipeVariationType, string> = {
 	light: "ライト",
 };
 
-// ==============================================================================
-// Italian Recipe Generation Workflow
-// This workflow handles the complete process of generating Italian recipes
-// from user-provided ingredients with multiple variations and suggestions.
-//
-// Test Scenarios:
-//
-// Scenario 1: Basic recipe generation
-// Input JSON:
-// {
-//   "ingredients": ["tomatoes", "basil", "mozzarella", "pasta"],
-//   "preferences": {
-//     "difficulty": "easy",
-//     "cookingTime": 30,
-//     "servings": 4
-//   },
-//   "includeVariations": true
-// }
-//
-// Scenario 2: Complex recipe with dietary restrictions
-// Input JSON:
-// {
-//   "ingredients": ["eggplant", "zucchini", "bell peppers", "onion", "garlic"],
-//   "preferences": {
-//     "difficulty": "medium",
-//     "servings": 6,
-//     "dietaryRestrictions": ["vegetarian"]
-//   },
-//   "includeVariations": true,
-//   "requestedVariations": ["vegan", "gluten-free"]
-// }
-//
-// Scenario 3: Quick recipe with limited ingredients
-// Input JSON:
-// {
-//   "ingredients": ["pasta", "olive oil", "garlic", "parmesan"],
-//   "preferences": {
-//     "difficulty": "easy",
-//     "cookingTime": 15,
-//     "servings": 2
-//   },
-//   "includeVariations": false
-// }
-// ==============================================================================
-
 export const italianRecipeWorkflow = createWorkflowChain({
 	id: "italian-recipe-generation",
 	name: "イタリアンレシピ生成ワークフロー",
