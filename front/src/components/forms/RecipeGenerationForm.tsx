@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useRecipeGeneration } from '@/hooks/useRecipeGeneration'
@@ -9,9 +9,10 @@ import Image from 'next/image'
 
 interface RecipeGenerationFormProps {
   onBack?: () => void
+  onRecipeGenerated?: (hasRecipe: boolean) => void
 }
 
-export function RecipeGenerationForm({ onBack }: RecipeGenerationFormProps) {
+export function RecipeGenerationForm({ onBack, onRecipeGenerated }: RecipeGenerationFormProps) {
   const [ingredients, setIngredients] = useState<string[]>([''])
   const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium')
   const [cookingTime, setCookingTime] = useState<number>(30)
@@ -91,6 +92,13 @@ export function RecipeGenerationForm({ onBack }: RecipeGenerationFormProps) {
 
   const recipeData = getRecipeData()
 
+  // レシピ生成状態を親コンポーネントに通知
+  useEffect(() => {
+    if (onRecipeGenerated) {
+      onRecipeGenerated(!!recipeData)
+    }
+  }, [recipeData, onRecipeGenerated])
+
   // ローディング状態の表示
   if (isLoading) {
     return (
@@ -129,7 +137,12 @@ export function RecipeGenerationForm({ onBack }: RecipeGenerationFormProps) {
           <div className="space-x-2">
             <Button
               variant="outline"
-              onClick={clearResult}
+              onClick={() => {
+                clearResult()
+                if (onRecipeGenerated) {
+                  onRecipeGenerated(false)
+                }
+              }}
             >
               新しいレシピを生成
             </Button>
