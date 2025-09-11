@@ -17,31 +17,50 @@ interface RecipeGenerationFormProps {
 export function RecipeGenerationForm({ onBack, onRecipeGenerated }: RecipeGenerationFormProps) {
   const [ingredients, setIngredients] = useState<string[]>([''])
   const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium')
-  const [cookingTime, setCookingTime] = useState<number>(30)
+  const [cookingTime, setCookingTime] = useState<number>(0)
   const [servings, setServings] = useState<number>(2)
   const [includeVariations, setIncludeVariations] = useState<boolean>(true)
   const [requestedVariations, setRequestedVariations] = useState<RecipeVariationType[]>(['vegetarian'])
   const [showSteamAnimation, setShowSteamAnimation] = useState<boolean>(false)
   const [justGenerated, setJustGenerated] = useState<boolean>(false)
 
-  const { generateRecipe, isLoading, result, error, clearResult, voltAgentStatus, checkVoltAgentStatus } = useRecipeGeneration()
+  const { isLoading, result, error, generateRecipe, clearResult } = useRecipeGeneration()
 
+  /**
+   * 食材の変更を処理する
+   * @param index 変更する食材のインデックス
+   * @param value 新しい食材の値
+   */
   const handleIngredientChange = (index: number, value: string) => {
     const newIngredients = [...ingredients]
     newIngredients[index] = value
     setIngredients(newIngredients)
   }
 
+  /**
+   * 食材を追加する
+   */
   const addIngredient = () => {
     setIngredients([...ingredients, ''])
   }
 
+  /**
+   * 食材を削除する
+   *
+   * @param index 削除する食材のインデックス
+   */
   const removeIngredient = (index: number) => {
     if (ingredients.length > 1) {
       setIngredients(ingredients.filter((_, i) => i !== index))
     }
   }
 
+  /**
+   * バリエーションの選択変更を処理する
+   * 
+   * @param variation 変更するバリエーションの種類
+   * @param checked チェック状態
+   */
   const handleVariationChange = (variation: RecipeVariationType, checked: boolean) => {
     if (checked) {
       setRequestedVariations(prev => [...prev, variation])
@@ -50,6 +69,11 @@ export function RecipeGenerationForm({ onBack, onRecipeGenerated }: RecipeGenera
     }
   }
 
+  /**
+   * フォームの送信を処理する
+   * 
+   * @param e フォーム送信イベント
+   */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -81,17 +105,18 @@ export function RecipeGenerationForm({ onBack, onRecipeGenerated }: RecipeGenera
     await generateRecipe(request)
   }
 
-  // レスポンスからレシピデータを抽出する関数
+  /**
+   * 生成されたレシピデータを解析して返す
+   * 
+   * @returns 解析されたレシピデータ、またはnull
+   */
   const getRecipeData = (): APIVariationResponse | RecipeResponse | null => {
     if (!result) return null
 
     try {
       console.log('Processing result:', result)
-
-      // result.data.text からJSONを直接抽出する場合
       let textContent = result.data?.text
 
-      // または result.data.provider.steps の最後のステップから抽出
       if (!textContent) {
         const steps = result.data?.provider?.steps
         if (steps && steps.length > 0) {
@@ -110,14 +135,12 @@ export function RecipeGenerationForm({ onBack, onRecipeGenerated }: RecipeGenera
 
       console.log('Extracted text content preview:', textContent.substring(0, 500))
 
-      // JSONブロックを抽出（```json ... ``` の形式）
       const jsonMatch = textContent.match(/```json\s*\n([\s\S]*?)\n\s*```/)
       if (jsonMatch) {
         const jsonStr = jsonMatch[1].trim()
         console.log('Extracted JSON string:', jsonStr.substring(0, 300))
         const parsed = JSON.parse(jsonStr)
 
-        // バリエーションレスポンスか通常のレシピレスポンスかを判定
         if (parsed.variationName) {
           return parsed as APIVariationResponse
         } else if (parsed.mainRecipe) {
@@ -128,7 +151,6 @@ export function RecipeGenerationForm({ onBack, onRecipeGenerated }: RecipeGenera
         }
       }
 
-      // 直接JSONとして解析を試行
       if (textContent.trim().startsWith('{')) {
         const parsed = JSON.parse(textContent)
         if (parsed.variationName) {
@@ -151,7 +173,6 @@ export function RecipeGenerationForm({ onBack, onRecipeGenerated }: RecipeGenera
 
   const recipeData = getRecipeData()
 
-  // バリエーションレスポンスかどうかをチェック
   const isVariationResponse = (data: any): data is APIVariationResponse => {
     return data && 'variationName' in data && !('mainRecipe' in data)
   }
@@ -161,7 +182,6 @@ export function RecipeGenerationForm({ onBack, onRecipeGenerated }: RecipeGenera
     if (!recipeData) return null
 
     if (isVariationResponse(recipeData)) {
-      // バリエーションレスポンスの場合、mainRecipe形式に変換
       return {
         mainRecipe: {
           recipeName: recipeData.variationName,
@@ -241,6 +261,7 @@ export function RecipeGenerationForm({ onBack, onRecipeGenerated }: RecipeGenera
     )
   }
 
+  // レシピ生成結果の表示
   if (displayRecipe) {
     return (
       <>
