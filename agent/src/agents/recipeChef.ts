@@ -5,10 +5,10 @@ import { z } from "zod";
 import { italianRecipeTool } from "../tools";
 
 /**
- * サブエージェント: レシピ生成専任
+ * サブエージェント: レシピ生成
  */
 export const recipeChefAgent = new Agent({
-  name: "italian-recipe-sub-recipe",
+  name: "italian-recipe-generate",
   instructions: `
     あなたはイタリアンのレシピ生成に特化しています。
     与えられた条件から、本格的で家庭で再現可能なレシピをJSONで返します。
