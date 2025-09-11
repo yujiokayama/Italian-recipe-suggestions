@@ -278,7 +278,9 @@ export function RecipeGenerationForm({ onBack, onRecipeGenerated }: RecipeGenera
                 <ul className="space-y-1">
                   {displayRecipe.mainRecipe.ingredients.map((ingredient: any, index: number) => (
                     <li key={index} className="text-sm">
-                      {ingredient.name}: {ingredient.amount} {ingredient.unit}
+                      {ingredient.name}: {ingredient.unit === '大さじ' || ingredient.unit === '小さじ' ? 
+                        `${ingredient.unit}${ingredient.amount}` : 
+                        `${ingredient.amount}${ingredient.unit}`}
                     </li>
                   ))}
                 </ul>

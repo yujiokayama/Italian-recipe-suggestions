@@ -4,20 +4,20 @@ import { Agent, VoltAgent, VoltOpsClient } from "@voltagent/core";
 import { createPinoLogger } from "@voltagent/logger";
 import { VercelAIProvider } from "@voltagent/vercel-ai";
 import {
-	ingredientAnalysisTool,
-	italianRecipeTool,
-	recipeVariationTool,
+  ingredientAnalysisTool,
+  italianRecipeTool,
+  recipeVariationTool,
 } from "./tools";
 import { z } from "zod";
 
 const logger = createPinoLogger({
-	name: "italian-recipe-agent",
-	level: "info",
+  name: "italian-recipe-agent",
+  level: "info",
 });
 
 const italianRecipeAgent = new Agent({
-	name: "italian-recipe-chef",
-	instructions: `
+  name: "italian-recipe-chef",
+  instructions: `
     あなたは本格的なイタリア料理の専門シェフです。
 
     あなたの専門知識には以下が含まれます：
@@ -38,6 +38,7 @@ const italianRecipeAgent = new Agent({
     家庭料理に適した詳細で分かりやすい手順を提供してください。
 
     入力されたレシピリクエストを解析し、JSON形式でレシピを返してください。
+    バリエーションが要求された場合、一つにまとめずにそれぞれ個別に提供してください。
 
     重要：単位は必ず日本語で表記してください：
     - 大さじ (tbsp → 大さじ)
@@ -53,7 +54,7 @@ const italianRecipeAgent = new Agent({
       "mainRecipe": {
         "recipeName": "レシピ名",
         "description": "レシピの説明",
-        "ingredients": [{"name": "食材名", "amount": "量", "unit": "日本語単位"}],
+        "ingredients": [{"name": "食材名", "amount": "量", "unit": "日本語単位" }],
         "instructions": ["手順1", "手順2", ...],
         "cookingTime": 調理時間(分),
         "difficulty": "初級|中級|上級",
@@ -65,7 +66,7 @@ const italianRecipeAgent = new Agent({
       },
       "variations": [
         {
-          "type": "ベジタリアン|ビーガン|グルテンフリー|スパイシー|クリーミー|ライト",
+          "type": "ベジタリアン"
           "recipeName": "バリエーションのレシピ名",
           "description": "バリエーションの説明",
           "ingredients": [{"name": "食材名", "amount": "量", "unit": "日本語単位", "substitution": true|false}],
@@ -73,7 +74,17 @@ const italianRecipeAgent = new Agent({
           "cookingTime": 調理時間(分),
           "difficulty": "初級|中級|上級",
           "tips": ["コツ1", "コツ2", ...],
-        }
+        },
+        {
+          "type": "グルテンフリー",
+          "recipeName": "バリエーションのレシピ名",
+          "description": "バリエーションの説明",
+          "ingredients": [{"name": "食材名", "amount": "量", "日本語単位": "unit", "substitution": true|false}],
+          "instructions": ["手順1", "手順2", ...],
+          "cookingTime": 調理時間(分),
+          "difficulty": "初級|中級|上級",
+          "tips": ["コツ1", "コツ2", ...],
+        },
       ],
       "ingredientAnalysis": {
         "compatibility": "高|中|低",
@@ -85,21 +96,21 @@ const italianRecipeAgent = new Agent({
       }
     }
   `,
-	parameters: z.object({
-		prompt: z.string().describe("ユーザーからの入力プロンプト"),
-	}),
-	llm: new VercelAIProvider(),
-	model: openai("gpt-4o-mini"),
-	tools: [italianRecipeTool, recipeVariationTool, ingredientAnalysisTool],
+  parameters: z.object({
+    prompt: z.string().describe("ユーザーからの入力プロンプト"),
+  }),
+  llm: new VercelAIProvider(),
+  model: openai("gpt-4o-mini"),
+  tools: [italianRecipeTool, recipeVariationTool, ingredientAnalysisTool],
 });
 
 new VoltAgent({
-	agents: {
-		"italian-recipe-chef": italianRecipeAgent,
-	},
-	logger,
-	voltOpsClient: new VoltOpsClient({
-		publicKey: process.env.VOLTAGENT_PUBLIC_KEY || "",
-		secretKey: process.env.VOLTAGENT_SECRET_KEY || "",
-	}),
+  agents: {
+    "italian-recipe-chef": italianRecipeAgent,
+  },
+  logger,
+  voltOpsClient: new VoltOpsClient({
+    publicKey: process.env.VOLTAGENT_PUBLIC_KEY || "",
+    secretKey: process.env.VOLTAGENT_SECRET_KEY || "",
+  }),
 });
