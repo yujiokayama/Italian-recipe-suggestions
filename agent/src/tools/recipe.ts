@@ -11,7 +11,6 @@ export const italianRecipeTool = createTool({
     prompt: z.string().describe("ユーザーからの入力プロンプト"),
   }),
   execute: async ({ prompt }) => {
-    // ユーザーのプロンプトを解析してレシピ生成
     const recipePrompt = `
       ${prompt}
 
@@ -47,19 +46,6 @@ export const italianRecipeTool = createTool({
           "region": "イタリアの地方（もしあれば）",
           "wine_pairing": "おすすめワイン"
         },
-        "variations": [
-          {
-            "variationName": "バリエーション名",
-            "modificationType": "バリエーションタイプ",
-            "ingredients": [{"name": "食材名", "amount": "分量", "unit": "日本語単位", "substitution": false}],
-            "instructions": ["手順1", "手順2", ...],
-            "substitutions": [{"original": "元の食材", "replacement": "代替食材", "reason": "理由"}],
-            "nutritionalBenefits": "栄養面での利点",
-            "difficulty": "難易度",
-            "cookingTime": 調理時間（分）,
-            "cuisine": "Italian"
-          }
-        ],
         "ingredientAnalysis": {
           "compatibility": "相性評価",
           "suggestedDishTypes": ["料理タイプ1", "料理タイプ2"],
