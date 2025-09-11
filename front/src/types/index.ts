@@ -1,4 +1,4 @@
-// バリエーションタイプの定数定義（agentと同期）
+// バリエーションタイプの定数定義
 export const RECIPE_VARIATIONS = [
 	"vegetarian",
 	"vegan", 

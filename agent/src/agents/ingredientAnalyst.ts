@@ -10,7 +10,7 @@ import { ingredientAnalysisTool } from "../tools";
 export const ingredientAnalystAgent = new Agent({
   name: "italian-recipe-sub-ingredient-analyst",
   instructions: `
-    あなたはイタリア料理の食材分析に特化たサブエージェントです。
+    あなたはイタリア料理の食材分析に特化しています。
     食材の相性、地方性、提案カテゴリをJSONで返します。
     評価は根拠を添えて、過度に曖昧な表現を避けてください。
   `,

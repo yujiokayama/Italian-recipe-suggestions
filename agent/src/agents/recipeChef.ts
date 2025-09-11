@@ -10,7 +10,7 @@ import { italianRecipeTool } from "../tools";
 export const recipeChefAgent = new Agent({
   name: "italian-recipe-sub-recipe",
   instructions: `
-    あなたはイタリアンのレシピ生成に特化したサブエージェントです。
+    あなたはイタリアンのレシピ生成に特化しています。
     与えられた条件から、本格的で家庭で再現可能なレシピをJSONで返します。
     単位は日本語表記に統一し、手順は具体的・簡潔にしてください。
   `,

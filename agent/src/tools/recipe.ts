@@ -144,16 +144,32 @@ export const recipeVariationTool = createTool({
 
       必須：レスポンスはJSON形式で以下の構造に従ってください：
       {
-        "variationName": "バリエーション名",
-        "originalRecipe": "オリジナルレシピ名",
-        "modificationType": "${variationTypeJa}",
-        "ingredients": [{"name": "食材名", "amount": "分量", "unit": "日本語単位", "substitution": "代替理由（もしあれば）"}],
-        "instructions": ["変更された手順1", "変更された手順2", ...],
-        "substitutions": [{"original": "元の食材", "replacement": "代替食材", "reason": "理由"}],
-        "nutritionalBenefits": "栄養面での利点（該当する場合）",
-        "difficulty": "難易度",
-        "cookingTime": 調理時間（分）,
-        "cuisine": "Italian"
+        variations: [
+          {
+            "variationName": "バリエーション名",
+            "originalRecipe": "オリジナルレシピ名",
+            "modificationType": "${variationTypeJa}",
+            "ingredients": [{"name": "食材名", "amount": "分量", "unit": "日本語単位", "substitution": "代替理由（もしあれば）"}],
+            "instructions": ["変更された手順1", "変更された手順2", ...],
+            "substitutions": [{"original": "元の食材", "replacement": "代替食材", "reason": "理由"}],
+            "nutritionalBenefits": "栄養面での利点（該当する場合）",
+            "difficulty": "難易度",
+            "cookingTime": 調理時間（分）,
+            "cuisine": "Italian"
+          },
+          {
+            "variationName": "バリエーション名2",
+            "originalRecipe": "オリジナルレシピ名2",
+            "modificationType": "${variationTypeJa}",
+            "ingredients": [{"name": "食材名2", "amount": "分量2", "unit": "日本語単位2", "substitution": "代替理由（もしあれば）2"}],
+            "instructions": ["変更された手順1-2", "変更された手順2-2", ...],
+            "substitutions": [{"original": "元の食材2", "replacement": "代替食材2", "reason": "理由2"}],
+            "nutritionalBenefits": "栄養面での利点（該当する場合）2",
+            "difficulty": "難易度2",
+            "cookingTime": 調理時間（分）2,
+            "cuisine": "Italian"
+          }
+        ]
       }
     `;
 

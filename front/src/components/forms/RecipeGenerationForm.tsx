@@ -28,6 +28,7 @@ export function RecipeGenerationForm({ onBack, onRecipeGenerated }: RecipeGenera
 
   /**
    * 食材の変更を処理する
+   * 
    * @param index 変更する食材のインデックス
    * @param value 新しい食材の値
    */
@@ -106,7 +107,7 @@ export function RecipeGenerationForm({ onBack, onRecipeGenerated }: RecipeGenera
   }
 
   /**
-   * 生成されたレシピデータを解析して返す
+   * 生成されたレシピデータを解析する
    * 
    * @returns 解析されたレシピデータ、またはnull
    */
