@@ -23,7 +23,7 @@ export function RecipeGenerationForm({ onBack, onRecipeGenerated }: RecipeGenera
   const [requestedVariations, setRequestedVariations] = useState<RecipeVariationType[]>(['vegetarian'])
   const [showSteamAnimation, setShowSteamAnimation] = useState<boolean>(false)
   const [justGenerated, setJustGenerated] = useState<boolean>(false)
-  
+
   const { generateRecipe, isLoading, result, error, clearResult, voltAgentStatus, checkVoltAgentStatus } = useRecipeGeneration()
 
   const handleIngredientChange = (index: number, value: string) => {
@@ -84,10 +84,10 @@ export function RecipeGenerationForm({ onBack, onRecipeGenerated }: RecipeGenera
   // レスポンスからレシピデータを抽出する関数
   const getRecipeData = (): APIVariationResponse | RecipeResponse | null => {
     if (!result) return null
-    
+
     try {
       console.log('Processing result:', result)
-      
+
       // result.data.text からJSONを直接抽出する場合
       let textContent = result.data?.text
 
@@ -116,7 +116,7 @@ export function RecipeGenerationForm({ onBack, onRecipeGenerated }: RecipeGenera
         const jsonStr = jsonMatch[1].trim()
         console.log('Extracted JSON string:', jsonStr.substring(0, 300))
         const parsed = JSON.parse(jsonStr)
-        
+
         // バリエーションレスポンスか通常のレシピレスポンスかを判定
         if (parsed.variationName) {
           return parsed as APIVariationResponse
@@ -159,7 +159,7 @@ export function RecipeGenerationForm({ onBack, onRecipeGenerated }: RecipeGenera
   // 表示用のレシピデータを正規化
   const getDisplayRecipe = () => {
     if (!recipeData) return null
-    
+
     if (isVariationResponse(recipeData)) {
       // バリエーションレスポンスの場合、mainRecipe形式に変換
       return {
@@ -193,7 +193,7 @@ export function RecipeGenerationForm({ onBack, onRecipeGenerated }: RecipeGenera
     if (onRecipeGenerated) {
       onRecipeGenerated(!!displayRecipe)
     }
-    
+
     // レシピが新しく生成された時に湯気アニメーションを表示
     if (displayRecipe && !justGenerated) {
       setShowSteamAnimation(true)
@@ -221,19 +221,19 @@ export function RecipeGenerationForm({ onBack, onRecipeGenerated }: RecipeGenera
     return (
       <div className="max-w-2xl mx-auto p-6">
         <div className="text-center">
-          <Image 
-            src="/images/buono-kun-recipe-think.png" 
-            alt="考え中のBuonoくん" 
+          <Image
+            src="/images/buono-kun-recipe-think.png"
+            alt="考え中のBuonoくん"
             width={300}
             height={300}
-            className="mx-auto mb-6" 
+            className="mx-auto mb-6"
           />
           <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-baseline justify-center gap-3">
             <span>レシピを考え中</span>
             <div className="flex items-baseline space-x-1">
               <div className="w-2 h-2 bg-italian-red rounded-full animate-bounce"></div>
-              <div className="w-2 h-2 bg-italian-red rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-              <div className="w-2 h-2 bg-italian-red rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+              <div className="w-2 h-2 bg-italian-red rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+              <div className="w-2 h-2 bg-italian-red rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
             </div>
           </h2>
         </div>
@@ -245,12 +245,12 @@ export function RecipeGenerationForm({ onBack, onRecipeGenerated }: RecipeGenera
     return (
       <>
         {/* 湯気アニメーション */}
-        <SteamAnimation 
+        <SteamAnimation
           isVisible={showSteamAnimation}
           onAnimationComplete={handleSteamAnimationComplete}
           duration={3000}
         />
-        
+
         <div className="max-w-4xl mx-auto p-6">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-gray-900">生成されたレシピ</h2>
@@ -264,159 +264,218 @@ export function RecipeGenerationForm({ onBack, onRecipeGenerated }: RecipeGenera
             </div>
           </div>
 
-        {/* メインレシピ */}
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-          <h3 className="text-xl font-bold text-italian-red mb-2">
-            {displayRecipe.mainRecipe.recipeName}
-          </h3>
-          <p className="text-gray-600 mb-4">{displayRecipe.mainRecipe.description}</p>
+          {/* メインレシピ */}
+          <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <h3 className="text-xl font-bold text-italian-red mb-2">
+              {displayRecipe.mainRecipe.recipeName}
+            </h3>
+            <p className="text-gray-600 mb-4">{displayRecipe.mainRecipe.description}</p>
 
-          <div className="grid md:grid-cols-2 gap-6">
-            {/* 食材 */}
-            <div>
-              <h4 className="font-semibold mb-3">食材 ({displayRecipe.mainRecipe.servings}人分)</h4>
-              <ul className="space-y-1">
-                {displayRecipe.mainRecipe.ingredients.map((ingredient: any, index: number) => (
-                  <li key={index} className="text-sm">
-                    {ingredient.name}: {ingredient.amount} {ingredient.unit}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* 作り方 */}
-            <div>
-              <h4 className="font-semibold mb-3">作り方</h4>
-              <ol className="space-y-2">
-                {displayRecipe.mainRecipe.instructions.map((instruction: string, index: number) => (
-                  <li key={index} className="text-sm">
-                    {instruction}
-                  </li>
-                ))}
-              </ol>
-            </div>
-          </div>
-
-          {/* 調理情報とコツ */}
-          <div className="mt-6 pt-6 border-t">
             <div className="grid md:grid-cols-2 gap-6">
+              {/* 食材 */}
               <div>
-                <h4 className="font-semibold mb-2">調理情報</h4>
-                <p className="text-sm text-gray-600">
-                  調理時間: {displayRecipe.mainRecipe.cookingTime}分<br />
-                  難易度: {displayRecipe.mainRecipe.difficulty}<br />
-                  地方: {displayRecipe.mainRecipe.region || 'イタリア全土'}
-                </p>
-                {displayRecipe.mainRecipe.wine_pairing && (
-                  <p className="text-sm text-gray-600 mt-2">
-                    おすすめワイン: {displayRecipe.mainRecipe.wine_pairing}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <h4 className="font-semibold mb-2">調理のコツ</h4>
+                <h4 className="font-semibold mb-3">食材 ({displayRecipe.mainRecipe.servings}人分)</h4>
                 <ul className="space-y-1">
-                  {displayRecipe.mainRecipe.tips?.map((tip: string, index: number) => (
-                    <li key={index} className="text-sm text-gray-600">
-                      • {tip}
+                  {displayRecipe.mainRecipe.ingredients.map((ingredient: any, index: number) => (
+                    <li key={index} className="text-sm">
+                      {ingredient.name}: {ingredient.amount} {ingredient.unit}
                     </li>
-                  )) || <li className="text-sm text-gray-600">特になし</li>}
+                  ))}
                 </ul>
               </div>
-            </div>
-          </div>
-        </div>
 
-        {/* バリエーション情報（バリエーションレスポンスの場合） */}
-        {isVariationResponse(recipeData) && displayRecipe && 'substitutions' in displayRecipe && displayRecipe.substitutions && displayRecipe.substitutions.length > 0 && (
-          <div className="bg-gray-50 rounded-lg p-6">
-            <h3 className="text-lg font-bold mb-4">このバリエーションについて</h3>
-            <div className="bg-white rounded p-4">
-              <h4 className="font-semibold text-italian-green mb-2">
-                食材の変更点
-              </h4>
-              <ul className="text-sm space-y-1">
-                {displayRecipe.substitutions.map((sub: any, subIndex: number) => (
-                  <li key={subIndex} className="text-gray-600">
-                    {sub.original} → {sub.replacement} ({sub.reason})
-                  </li>
-                ))}
-              </ul>
-              {displayRecipe.nutritionalBenefits && (
-                <div className="mt-3">
-                  <h5 className="font-medium mb-1">栄養面での利点:</h5>
-                  <p className="text-sm text-gray-600">{displayRecipe.nutritionalBenefits}</p>
-                </div>
-              )}
+              {/* 作り方 */}
+              <div>
+                <h4 className="font-semibold mb-3">作り方</h4>
+                <ol className="space-y-2">
+                  {displayRecipe.mainRecipe.instructions.map((instruction: string, index: number) => (
+                    <li key={index} className="text-sm">
+                      {instruction}
+                    </li>
+                  ))}
+                </ol>
+              </div>
             </div>
-          </div>
-        )}
 
-        {/* バリエーション（通常のレシピレスポンスの場合） */}
-        {!isVariationResponse(recipeData) && displayRecipe.variations && displayRecipe.variations.length > 0 && (
-          <div className="bg-gray-50 rounded-lg p-6">
-            <h3 className="text-lg font-bold mb-4">アレンジレシピ</h3>
-            <div className="space-y-4">
-              {displayRecipe.variations.map((variation: any, index: number) => (
-                <div key={index} className="bg-white rounded p-4">
-                  <h4 className="font-semibold text-italian-green mb-2">
-                    {variation.variationName}
-                  </h4>
-                  <p className="text-sm text-gray-600 mb-3">
-                    タイプ: {variation.modificationType}
+            {/* 調理情報とコツ */}
+            <div className="mt-6 pt-6 border-t">
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="font-semibold mb-2">調理情報</h4>
+                  <p className="text-sm text-gray-600">
+                    調理時間: {displayRecipe.mainRecipe.cookingTime}分<br />
+                    難易度: {displayRecipe.mainRecipe.difficulty}<br />
+                    地方: {displayRecipe.mainRecipe.region || 'イタリア全土'}
                   </p>
-                  
-                  {variation.substitutions && variation.substitutions.length > 0 && (
-                    <div>
-                      <h5 className="font-medium mb-1">食材の変更:</h5>
-                      <ul className="text-sm space-y-1">
-                        {variation.substitutions.map((sub: any, subIndex: number) => (
-                          <li key={subIndex} className="text-gray-600">
-                            {sub.original} → {sub.replacement} ({sub.reason})
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+                  {displayRecipe.mainRecipe.wine_pairing && (
+                    <p className="text-sm text-gray-600 mt-2">
+                      おすすめワイン: {displayRecipe.mainRecipe.wine_pairing}
+                    </p>
                   )}
                 </div>
-              ))}
+
+                <div>
+                  <h4 className="font-semibold mb-2">調理のコツ</h4>
+                  <ul className="space-y-1">
+                    {displayRecipe.mainRecipe.tips?.map((tip: string, index: number) => (
+                      <li key={index} className="text-sm text-gray-600">
+                        • {tip}
+                      </li>
+                    )) || <li className="text-sm text-gray-600">特になし</li>}
+                  </ul>
+                </div>
+              </div>
             </div>
           </div>
-        )}
 
-        {/* 食材分析 */}
-                {/* 食材分析 */}
-        {displayRecipe.ingredientAnalysis && (
-          <div className="bg-blue-50 rounded-lg p-6 mt-6">
-            <h3 className="text-lg font-bold mb-4">食材分析</h3>
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <h4 className="font-semibold mb-2">相性度: {displayRecipe.ingredientAnalysis.compatibility}</h4>
-                <p className="text-sm text-gray-600 mb-3">
-                  難易度評価: {displayRecipe.ingredientAnalysis.difficultyAssessment}
-                </p>
-                <h5 className="font-medium mb-1">推奨料理タイプ:</h5>
+          {/* バリエーション情報（バリエーションレスポンスの場合） */}
+          {isVariationResponse(recipeData) && displayRecipe && 'substitutions' in displayRecipe && displayRecipe.substitutions && displayRecipe.substitutions.length > 0 && (
+            <div className="bg-gray-50 rounded-lg p-6">
+              <h3 className="text-lg font-bold mb-4">このバリエーションについて</h3>
+              <div className="bg-white rounded p-4">
+                <h4 className="font-semibold text-italian-green mb-2">
+                  食材の変更点
+                </h4>
                 <ul className="text-sm space-y-1">
-                  {displayRecipe.ingredientAnalysis.suggestedDishTypes.map((type: string, index: number) => (
-                    <li key={index} className="text-gray-600">• {type}</li>
-                  ))}
-                </ul>
-              </div>
-              
-              <div>
-                <h5 className="font-medium mb-1">おすすめ追加食材:</h5>
-                <ul className="text-sm space-y-1">
-                  {displayRecipe.ingredientAnalysis.recommendedAdditions.map((addition: any, index: number) => (
-                    <li key={index} className="text-gray-600">
-                      • {addition.ingredient} - {addition.reason}
+                  {displayRecipe.substitutions.map((sub: any, subIndex: number) => (
+                    <li key={subIndex} className="text-gray-600">
+                      {sub.original} → {sub.replacement} ({sub.reason})
                     </li>
                   ))}
                 </ul>
+                {displayRecipe.nutritionalBenefits && (
+                  <div className="mt-3">
+                    <h5 className="font-medium mb-1">栄養面での利点:</h5>
+                    <p className="text-sm text-gray-600">{displayRecipe.nutritionalBenefits}</p>
+                  </div>
+                )}
               </div>
             </div>
-          </div>
-        )}
+          )}
+
+          {/* バリエーション（通常のレシピレスポンスの場合） */}
+          {!isVariationResponse(recipeData) && displayRecipe.variations && displayRecipe.variations.length > 0 && (
+            <div className="bg-gray-50 rounded-lg p-6">
+              <h3 className="text-lg font-bold mb-4">アレンジレシピ</h3>
+              <div className="space-y-6">
+                {displayRecipe.variations.map((variation: any, index: number) => (
+                  <div key={index} className="bg-white rounded-lg p-6 border">
+                    <h4 className="text-xl font-bold text-italian-green mb-2">
+                      {variation.variationName}
+                    </h4>
+                    <p className="text-gray-600 mb-4">
+                      タイプ: {variation.modificationType}
+                    </p>
+
+                    {/* 材料 */}
+                    {variation.ingredients && variation.ingredients.length > 0 && (
+                      <div className="mb-6">
+                        <h5 className="font-semibold mb-3">材料 ({variation.servings || 2}人分)</h5>
+                        <div className="grid md:grid-cols-2 gap-2">
+                          {variation.ingredients.map((ingredient: any, ingredientIndex: number) => (
+                            <div key={ingredientIndex} className="flex justify-between py-1">
+                              <span className="text-gray-700">{ingredient.name}</span>
+                              <span className="font-medium">
+                                {ingredient.amount} {ingredient.unit}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* 作り方 */}
+                    {variation.instructions && variation.instructions.length > 0 && (
+                      <div className="mb-6">
+                        <h5 className="font-semibold mb-3">作り方</h5>
+                        <ol className="space-y-2">
+                          {variation.instructions.map((step: string, stepIndex: number) => (
+                            <li key={stepIndex} className="text-sm text-gray-700 leading-relaxed">
+                              {step}
+                            </li>
+                          ))}
+                        </ol>
+                      </div>
+                    )}
+
+                    {/* 調理情報 */}
+                    <div className="mb-4 pt-4 border-t">
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div>
+                          <h6 className="font-semibold mb-2">調理情報</h6>
+                          <p className="text-sm text-gray-600">
+                            {variation.cookingTime && (
+                              <>調理時間: {variation.cookingTime}分<br /></>
+                            )}
+                            {variation.difficulty && (
+                              <>難易度: {variation.difficulty}<br /></>
+                            )}
+                            {variation.cuisine && (
+                              <>料理: {variation.cuisine}</>
+                            )}
+                          </p>
+                        </div>
+
+                        {/* 栄養面での利点 */}
+                        {variation.nutritionalBenefits && (
+                          <div>
+                            <h6 className="font-semibold mb-2">栄養面での利点</h6>
+                            <p className="text-sm text-gray-600">{variation.nutritionalBenefits}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* 食材の変更点（従来の表示も残す） */}
+                    {variation.substitutions && variation.substitutions.length > 0 && (
+                      <div className="pt-4 border-t">
+                        <h6 className="font-semibold mb-2">食材の変更:</h6>
+                        <ul className="text-sm space-y-1">
+                          {variation.substitutions.map((sub: any, subIndex: number) => (
+                            <li key={subIndex} className="text-gray-600">
+                              {sub.original} → {sub.replacement} ({sub.reason})
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 食材分析 */}
+          {displayRecipe.ingredientAnalysis && (
+            <div className="bg-blue-50 rounded-lg p-6 mt-6">
+              <h3 className="text-lg font-bold mb-4">食材分析</h3>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="font-semibold mb-2">相性度: {displayRecipe.ingredientAnalysis.compatibility}</h4>
+                  <p className="text-sm text-gray-600 mb-3">
+                    難易度評価: {displayRecipe.ingredientAnalysis.difficultyAssessment}
+                  </p>
+                  <h5 className="font-medium mb-1">推奨料理タイプ:</h5>
+                  <ul className="text-sm space-y-1">
+                    {displayRecipe.ingredientAnalysis.suggestedDishTypes.map((type: string, index: number) => (
+                      <li key={index} className="text-gray-600">• {type}</li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div>
+                  <h5 className="font-medium mb-1">おすすめ追加食材:</h5>
+                  <ul className="text-sm space-y-1">
+                    {displayRecipe.ingredientAnalysis.recommendedAdditions.map((addition: any, index: number) => (
+                      <li key={index} className="text-gray-600">
+                        • {addition.ingredient} - {addition.reason}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </>
     )
@@ -524,8 +583,8 @@ export function RecipeGenerationForm({ onBack, onRecipeGenerated }: RecipeGenera
                     onChange={(e) => handleVariationChange(variation, e.target.checked)}
                     className="mr-2"
                   />
-                  <label 
-                    htmlFor={`variation-${variation}`} 
+                  <label
+                    htmlFor={`variation-${variation}`}
                     className="text-sm text-gray-700 cursor-pointer"
                   >
                     {VARIATION_NAMES[variation]}
