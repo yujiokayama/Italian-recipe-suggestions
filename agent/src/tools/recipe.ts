@@ -2,7 +2,7 @@ import { createTool } from "@voltagent/core";
 import { z } from "zod";
 
 export const recipeGenerationTool = createTool({
-  name: "レシピ生成",
+  name: "recipeGenerate",
   description: "提供されたプロンプトからイタリアンレシピを生成する",
   parameters: z.object({
     prompt: z.string().describe("ユーザーからの入力プロンプト"),

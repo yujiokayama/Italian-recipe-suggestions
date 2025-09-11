@@ -11,7 +11,7 @@ import { recipeVariationAgent } from "./recipeVariation";
  * Buonoくん
  */
 export const BuonoKun = new Agent({
-  name: "Buonoくん",
+  name: "buono-kun",
   instructions: `
     ユーザーのリクエストを理解し、必ず次の順序で対応してください：
 
