@@ -128,28 +128,6 @@ export interface RecipeVariation {
   cuisine: string
 }
 
-// 実際のAPIレスポンスに対応した新しい型
-export interface APIVariationResponse {
-  variationName: string
-  originalRecipe: string
-  modificationType: string
-  ingredients: {
-    name: string
-    amount: string
-    unit: string
-    substitution?: string
-  }[]
-  instructions: string[]
-  substitutions: {
-    original: string
-    replacement: string
-    reason: string
-  }[]
-  nutritionalBenefits?: string
-  difficulty: string
-  cookingTime: number
-  cuisine: string
-}
 
 export interface IngredientAnalysis {
   compatibility: string
