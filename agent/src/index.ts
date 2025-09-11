@@ -1,17 +1,17 @@
 import "dotenv/config";
 import { VoltAgent, VoltOpsClient } from "@voltagent/core";
 import { createPinoLogger } from "@voltagent/logger";
-import { mainAgent } from "./agents/main";
+import { BuonoKun } from "./agents/main";
 
 
 const logger = createPinoLogger({
-  name: "italian-recipe-agent",
+  name: "buono-kun",
   level: "info",
 });
 
 new VoltAgent({
   agents: {
-  "italian-recipe-chef": mainAgent,
+    "buono-kun": BuonoKun,
   },
   logger,
   voltOpsClient: new VoltOpsClient({

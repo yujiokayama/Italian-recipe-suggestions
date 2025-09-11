@@ -1,31 +1,42 @@
 import { Agent } from "@voltagent/core";
 import { VercelAIProvider } from "@voltagent/vercel-ai";
 import { openai } from "@ai-sdk/openai";
-
-import { ingredientAnalystAgent } from "./ingredientAnalyst";
-import { recipeChefAgent } from "./recipeChef";
-import { variationChefAgent } from "./variationChef";
-
-
 import { z } from "zod";
 
-/**
- * メインエージェント
- */
-export const mainAgent = new Agent({
-  name: "italian-recipe-chef",
-  instructions: `
-    あなたは本格的なイタリア料理のレシピを作成するエキスパートシェフです。
+import { ingredientAnalystAgent } from "./ingredientAnalyst";
+import { recipeGenerationAgent } from "./recipeGeneration";
+import { recipeVariationAgent } from "./recipeVariation";
 
-    ユーザーのリクエストを理解し、次のフローで対応してください：
-    1. 食材の分析：提供された食材のイタリア料理への適性を評価し、相性や地方ごとの使用法を提案します。
-    2. レシピの生成：分析結果とユーザーの条件に基づき、詳細なイタリアンレシピを作成します。
-    3. レシピのバリエーション生成：必要に応じて、指定されたスタイルや条件に合わせたレシピの変更案を提供します。
+/**
+ * Buonoくん
+ */
+export const BuonoKun = new Agent({
+  name: "Buonoくん",
+  instructions: `
+    ユーザーのリクエストを理解し、必ず次の順序で対応してください：
+
+    **Step 1: 食材分析 
+    - ユーザーが提示した食材、またはプロンプトから抽出した食材を分析
+    - 食材のイタリア料理への適性、相性、地方ごとの使用法を評価
+    - 分析結果を元に推奨する料理のカテゴリーを特定
+
+    **Step 2: レシピ生成
+    - Step 1の分析結果とユーザーの条件を組み合わせ
+    - 詳細なイタリアンレシピを作成
+    - 分析で得られた食材の特性を活かしたレシピ提案
+
+    **Step 3: バリエーション生成（必要な場合のみ）**
+    - ユーザーがバリエーション（ベジタリアン、ビーガン、グルテンフリー等）を求めている場合
+    - Step 2で生成したレシピをベースにアレンジレシピを作成
+    - 指定されたスタイルや条件に合わせた代替案を提供
+
+    各ステップのレスポンスは必ずJSON形式でまとめてください。
+    例:
   `,
   parameters: z.object({
     prompt: z.string().describe("ユーザーからの入力プロンプト"),
   }),
   llm: new VercelAIProvider(),
   model: openai("gpt-4o-mini"),
-  subAgents: [ingredientAnalystAgent, recipeChefAgent, variationChefAgent],
+  subAgents: [ingredientAnalystAgent, recipeGenerationAgent, recipeVariationAgent]
 });

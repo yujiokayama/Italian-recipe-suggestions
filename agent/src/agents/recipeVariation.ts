@@ -5,10 +5,10 @@ import { z } from "zod";
 import { recipeVariationTool } from "../tools";
 
 /**
- * サブエージェント: レシピのバリエーション生成
+ * レシピのバリエーション生成
  */
-export const variationChefAgent = new Agent({
-  name: "italian-recipe-variation",
+export const recipeVariationAgent = new Agent({
+  name: "レシピバリエーション生成",
   instructions: `
     あなたはイタリアンレシピのバリエーション作成に特化しています。
     指定のスタイル（ベジタリアン、グルテンフリー等）に沿った変更案をJSONで返します。
