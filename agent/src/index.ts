@@ -9,8 +9,6 @@ const logger = createPinoLogger({
   level: "info",
 });
 
-// 既存の単一エージェント構成を、メイン＋サブの複数エージェントに移行
-
 new VoltAgent({
   agents: {
   "italian-recipe-chef": mainAgent,
