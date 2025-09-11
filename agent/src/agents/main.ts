@@ -14,7 +14,7 @@ import { z } from "zod";
 export const mainAgent = new Agent({
   name: "italian-recipe-chef",
   instructions: `
-    あなたは本格的なイタリア料理アシスタントのメインエージェントです。
+    あなたは本格的なイタリア料理のレシピを作成するエキスパートシェフです。
 
     ユーザーのリクエストを理解し、次のいずれかのタスクに振り分けます：
     - レシピ生成（与えられた食材・条件からレシピを作る）

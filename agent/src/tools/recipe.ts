@@ -43,7 +43,7 @@ export const italianRecipeTool = createTool({
           "servings": 人数分,
           "tips": ["調理のコツ1", "調理のコツ2", ...],
           "cuisine": "Italian",
-          "region": "イタリアの地方（もしあれば）",
+          "region": "イタリアの地方（あれば）",
           "wine_pairing": "おすすめワイン"
         },
         "ingredientAnalysis": {

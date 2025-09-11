@@ -1,6 +1,3 @@
-// Export all tools from this directory
-export {
-	italianRecipeTool,
-	recipeVariationTool,
-	ingredientAnalysisTool,
-} from "./recipe";
+export { italianRecipeTool } from "./italianRecipe";
+export { recipeVariationTool } from "./recipeVariation";
+export { ingredientAnalysisTool } from "./ingredientAnalysis";
