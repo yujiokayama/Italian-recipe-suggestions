@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import type { NewRecipeRequest, VoltAgentResponse, RecipeVariationType } from '@/types'
-import { VARIATION_NAMES } from '@/types'
+import { VARIATION_NAMES, DIFFICULTY_NAMES } from '@/types'
 
 interface UseRecipeGenerationReturn {
   generateRecipe: (request: NewRecipeRequest) => Promise<void>
@@ -37,7 +37,8 @@ export function useRecipeGeneration(): UseRecipeGenerationReturn {
       }
 
       if (preferencesSection && 'difficulty' in preferencesSection) {
-        prompt += `難易度: ${preferencesSection.difficulty}\n`
+        const japaneseDifficulty = DIFFICULTY_NAMES[preferencesSection.difficulty as keyof typeof DIFFICULTY_NAMES] || preferencesSection.difficulty
+        prompt += `難易度: ${japaneseDifficulty}\n`
         prompt += `人数: ${preferencesSection.servings}人分\n`
       }
 
@@ -73,6 +74,7 @@ export function useRecipeGeneration(): UseRecipeGenerationReturn {
 
       if (!response.ok) {
         const errorText = await response.text()
+
         console.error('API error response:', errorText)
         throw new Error(`レシピ生成に失敗しました: ${response.statusText}`)
       }

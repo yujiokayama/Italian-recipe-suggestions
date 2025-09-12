@@ -66,10 +66,17 @@ export function RecipeGenerationForm({
     variation: RecipeVariationType,
     checked: boolean
   ) => {
+    let newVariations: RecipeVariationType[];
     if (checked) {
-      setRequestedVariations((prev) => [...prev, variation]);
+      newVariations = [...requestedVariations, variation];
     } else {
-      setRequestedVariations((prev) => prev.filter((v) => v !== variation));
+      newVariations = requestedVariations.filter((v) => v !== variation);
+    }
+    setRequestedVariations(newVariations);
+    
+    // バリエーションが1つもない場合は「アレンジレシピも提案する」をオフにする
+    if (newVariations.length === 0) {
+      setIncludeVariations(false);
     }
   };
 

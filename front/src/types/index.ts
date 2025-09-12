@@ -19,6 +19,12 @@ export const VARIATION_NAMES: Record<RecipeVariationType, string> = {
 	light: "ライト",
 };
 
+export const DIFFICULTY_NAMES: Record<'easy' | 'medium' | 'hard', string> = {
+	easy: "簡単",
+	medium: "普通",
+	hard: "難しい",
+};
+
 export interface User {
   id: string
   email: string
