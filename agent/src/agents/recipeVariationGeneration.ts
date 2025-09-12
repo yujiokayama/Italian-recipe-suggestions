@@ -1,6 +1,5 @@
 import { openai } from "@ai-sdk/openai";
 import { Agent } from "@voltagent/core";
-import { z } from "zod";
 import { recipeVariationGenerationTool } from "../tools";
 
 

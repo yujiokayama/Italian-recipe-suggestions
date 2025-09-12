@@ -1,9 +1,7 @@
 import { openai } from "@ai-sdk/openai";
 
-import { VoltAgent, Agent, Memory } from "@voltagent/core";
+import { Agent, Memory } from "@voltagent/core";
 import { LibSQLMemoryAdapter } from "@voltagent/libsql";
-
-import { z } from "zod";
 
 import { RecipeGenerationAgent } from "./recipeGeneration";
 import { RecipeVariationGenerationAgent } from "./recipeVariationGeneration";
@@ -23,17 +21,15 @@ export const BuonoKun = new Agent({
 
     # 手順
     1. RecipeGenerationAgentを使用してメインレシピを生成します。
-    2. RecipeVariationGenerationAgentを使用してレシピのバリエーションを生成します（必要に応じて）。
+    2. RecipeVariationGenerationAgentを使用してレシピのバリエーションを生成します（指定があれば）。
     3. 最終的に、各エージェントから返されたデータを以下のJSONフォーマットに統合してユーザーに提供します。
 
     # 最終出力JSONフォーマット（必須）
     {
       "mainRecipe": RecipeGenerationAgentから生成されたレシピのJSONオブジェクト,
-      "variations": RecipeVariationGenerationAgentから生成されたバリエーションのJSONオブジェクト配列,
+      "variations?": RecipeVariationGenerationAgentから生成されたバリエーションのJSONオブジェクト配列,
       "metadata": {
         "generatedAt": "${new Date().toISOString()}",
-        "totalRecipes": バリエーションを含む総レシピ数,
-        "language": "ja"
       }
     }
 
@@ -49,9 +45,6 @@ export const BuonoKun = new Agent({
     - 余計な説明文は一切含めない
     - JSONの外側にテキストを含めない
   `,
-  // parameters: z.object({
-  //   prompt: z.string().describe("食材、難易度、人数、バリエーションの要求を含む自然文入力。例: 'トマトとバジルでパスタを作りたいです。初心者向けで2人分、ヘルシーなバリエーションも教えてください'"),
-  // }),
   memory,
   model: openai("gpt-4o-mini"),
   subAgents: [RecipeGenerationAgent, RecipeVariationGenerationAgent],
