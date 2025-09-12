@@ -104,6 +104,7 @@ export interface VoltAgentRecipe {
   cuisine: string
   region?: string
   wine_pairing?: string
+  winePairing?: string  // レスポンスで使われるプロパティ名
 }
 
 export interface RecipeVariation {
