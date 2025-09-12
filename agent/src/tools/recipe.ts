@@ -2,7 +2,7 @@ import { createTool } from "@voltagent/core";
 import { z } from "zod";
 
 export const recipeGenerationTool = createTool({
-  name: "generate_recipe",
+  name: "recipeGenerationTool",
   description: "提供されたプロンプトからイタリアンレシピを生成する",
   parameters: z.object({
     prompt: z.string().describe("ユーザーからの入力プロンプト"),
@@ -105,7 +105,7 @@ export const recipeGenerationTool = createTool({
  * レシピバリエーション生成ツール
  */
 export const recipeVariationTool = createTool({
-  name: "generateRecipeVariations",
+  name: "recipeVariationTool",
   description: "既存のイタリアンレシピのバリエーションを生成する",
   parameters: z.object({
     baseRecipe: z.string().describe("ベースとなるレシピ名または説明"),
@@ -189,7 +189,7 @@ export const recipeVariationTool = createTool({
  * 食材分析ツール
  */
 export const ingredientAnalysisTool = createTool({
-  name: "analyzeIngredients",
+  name: "ingredientAnalysisTool",
   description: "イタリア料理への食材の適性を分析し、組み合わせを提案する",
   parameters: z.object({
     ingredients: z.array(z.string()).describe("分析する食材"),
