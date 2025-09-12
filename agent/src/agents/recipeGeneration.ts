@@ -8,7 +8,7 @@ import { recipeGenerationTool } from "../tools/recipe";
  * レシピ生成
  */
 export const recipeGenerationAgent = new Agent({
-  name: "レシピ生成",
+  name: "recipeGenerate",
   instructions: `
     あなたはイタリアンのレシピ生成に特化しています。
     与えられた条件から、本格的で家庭で再現可能なレシピをJSONで返します。
