@@ -1,6 +1,5 @@
 import { openai } from "@ai-sdk/openai";
 import { Agent } from "@voltagent/core";
-import { z } from "zod";
 import { recipeGenerationTool } from "../tools";
 
 /**
@@ -17,9 +16,6 @@ export const RecipeGenerationAgent = new Agent({
     - 統合エージェントが処理しやすいよう、純粋なJSONのみを返してください
     - 説明文やコメントは含めないでください
   `,
-  // parameters: z.object({
-  //   ingredients: z.array(z.string()).describe("食材"),
-  // }),
   model: openai("gpt-4o-mini"),
   tools: [recipeGenerationTool],
 });

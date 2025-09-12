@@ -18,10 +18,6 @@ export const RecipeVariationGenerationAgent = new Agent({
     - 統合エージェントが処理しやすいよう、純粋なJSONのみを返してください
     - 説明文やコメントは含めないでください
   `,
-	// parameters: z.object({
-	// 	baseRecipe: z.string().describe("ベースとなるレシピ"),
-  //   variationTypeList: z.array(z.string()).describe("生成したいバリエーションのタイプ"),
-	// }),
 	model: openai("gpt-4o-mini"),
   tools: [recipeVariationGenerationTool],
 });
