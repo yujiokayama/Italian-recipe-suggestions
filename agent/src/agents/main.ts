@@ -1,11 +1,16 @@
-import { Agent } from "@voltagent/core";
-import { VercelAIProvider } from "@voltagent/vercel-ai";
 import { openai } from "@ai-sdk/openai";
+
+import { VoltAgent, Agent, Memory } from "@voltagent/core";
+import { LibSQLMemoryAdapter } from "@voltagent/libsql";
+
 import { z } from "zod";
 
-import { ingredientAnalystAgent } from "./ingredientAnalyst";
-import { recipeGenerationAgent } from "./recipeGeneration";
-import { recipeVariationAgent } from "./recipeVariation";
+import { RecipeGenerationAgent } from "./recipeGeneration";
+import { RecipeVariationGenerationAgent } from "./recipeVariationGeneration";
+
+const memory = new Memory({
+  storage: new LibSQLMemoryAdapter({ url: "file:./.voltagent/memory.db" }),
+});
 
 /**
  * Buonoくん
@@ -13,30 +18,41 @@ import { recipeVariationAgent } from "./recipeVariation";
 export const BuonoKun = new Agent({
   name: "buono-kun",
   instructions: `
-    ユーザーのリクエストを理解し、必ず次の順序で対応してください：
+    あなたはイタリア料理レシピ提案の統合エージェントです。
+    以下の手順に従って、イタリアンレシピ情報を提供します。
 
-    **Step 1: 食材分析 
-    - ユーザーが提示した食材、またはプロンプトから抽出した食材を分析
-    - 食材のイタリア料理への適性、相性、地方ごとの使用法を評価
-    - 分析結果を元に推奨する料理のカテゴリーを特定
+    # 手順
+    1. RecipeGenerationAgentを使用してメインレシピを生成します。
+    2. RecipeVariationGenerationAgentを使用してレシピのバリエーションを生成します（必要に応じて）。
+    3. 最終的に、各エージェントから返されたデータを以下のJSONフォーマットに統合してユーザーに提供します。
 
-    **Step 2: レシピ生成
-    - Step 1の分析結果とユーザーの条件を組み合わせ
-    - 詳細なイタリアンレシピを作成
-    - 分析で得られた食材の特性を活かしたレシピ提案
+    # 最終出力JSONフォーマット（必須）
+    {
+      "mainRecipe": RecipeGenerationAgentから生成されたレシピのJSONオブジェクト,
+      "variations": RecipeVariationGenerationAgentから生成されたバリエーションのJSONオブジェクト配列,
+      "metadata": {
+        "generatedAt": "${new Date().toISOString()}",
+        "totalRecipes": バリエーションを含む総レシピ数,
+        "language": "ja"
+      }
+    }
 
-    **Step 3: バリエーション生成（必要な場合のみ）**
-    - ユーザーがバリエーション（ベジタリアン、ビーガン、グルテンフリー等）を求めている場合
-    - Step 2で生成したレシピをベースにアレンジレシピを作成
-    - 指定されたスタイルや条件に合わせた代替案を提供
+    # 統合処理の詳細指示
+    - RecipeGenerationAgentの結果をそのまま"mainRecipe"フィールドに配置
+    - RecipeVariationGenerationAgentの結果配列をそのまま"variations"フィールドに配置
+    - バリエーションが生成されない場合は"variations"を空配列[]に設定
+    - metadataには現在日時と統計情報を含める
 
-    各ステップのレスポンスは必ずJSON形式でまとめてください。
-    例:
+    # 厳守事項
+    - サブエージェントやツールを呼び出す際に、確認や同意のプロンプトは一切表示しない
+    - 最終的に上記JSONフォーマットでのみレスポンスを返却する
+    - 余計な説明文は一切含めない
+    - JSONの外側にテキストを含めない
   `,
-  parameters: z.object({
-    prompt: z.string().describe("ユーザーからの入力プロンプト"),
-  }),
-  llm: new VercelAIProvider(),
+  // parameters: z.object({
+  //   prompt: z.string().describe("食材、難易度、人数、バリエーションの要求を含む自然文入力。例: 'トマトとバジルでパスタを作りたいです。初心者向けで2人分、ヘルシーなバリエーションも教えてください'"),
+  // }),
+  memory,
   model: openai("gpt-4o-mini"),
-  subAgents: [ingredientAnalystAgent, recipeGenerationAgent, recipeVariationAgent]
+  subAgents: [RecipeGenerationAgent, RecipeVariationGenerationAgent],
 });

@@ -1,23 +1,25 @@
-import { Agent } from "@voltagent/core";
-import { VercelAIProvider } from "@voltagent/vercel-ai";
 import { openai } from "@ai-sdk/openai";
+import { Agent } from "@voltagent/core";
 import { z } from "zod";
-import { recipeGenerationTool } from "../tools/recipe";
+import { recipeGenerationTool } from "../tools";
 
 /**
  * レシピ生成
  */
-export const recipeGenerationAgent = new Agent({
-  name: "recipeGenerate",
+export const RecipeGenerationAgent = new Agent({
+  name: "recipe-generation-agent",
   instructions: `
-    あなたはイタリアンのレシピ生成に特化しています。
-    与えられた条件から、本格的で家庭で再現可能なレシピをJSONで返します。
-    単位は日本語表記に統一し、手順は具体的・簡潔にしてください。
+    あなたはイタリアンのレシピ生成に特化したエージェントです。
+    食材から、本格的で家庭で再現可能なレシピを作成してください。
+
+    # 出力形式
+    - 必ずJSONオブジェクト形式で出力してください
+    - 統合エージェントが処理しやすいよう、純粋なJSONのみを返してください
+    - 説明文やコメントは含めないでください
   `,
-  parameters: z.object({
-    prompt: z.string().describe("ユーザーからの入力プロンプト"),
-  }),
-  llm: new VercelAIProvider(),
+  // parameters: z.object({
+  //   ingredients: z.array(z.string()).describe("食材"),
+  // }),
   model: openai("gpt-4o-mini"),
   tools: [recipeGenerationTool],
 });
