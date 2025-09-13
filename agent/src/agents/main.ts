@@ -25,12 +25,16 @@ export const BuonoKun = new Agent({
     3. 最終的に、各エージェントから返されたデータを以下のJSONフォーマットに統合してユーザーに提供します。
 
     # 最終出力JSONフォーマット（必須）
+
+    # バリエーション要求がない場合
     {
       "mainRecipe": RecipeGenerationAgentから生成されたレシピのJSONオブジェクト,
-      "variations": RecipeVariationGenerationAgentから生成されたバリエーションのJSONオブジェクト配列（バリエーション要求がない場合は出力しない）,
-      "metadata": {
-        "generatedAt": "${new Date().toISOString()}",
-      }
+    }
+
+    # バリエーション要求がある場合
+    {
+      "mainRecipe": RecipeGenerationAgentから生成されたレシピのJSONオブジェクト,
+      "variations": RecipeVariationGenerationAgentから生成されたバリエーションのJSONオブジェクト配列,
     }
 
     # 統合処理の詳細指示

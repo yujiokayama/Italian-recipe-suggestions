@@ -49,8 +49,7 @@ export function useRecipeGeneration(): UseRecipeGenerationReturn {
 
       prompt += '\nこれらの条件でイタリア料理のレシピを教えてください。'
 
-      // 新しいAPI routeを使用
-      const response = await fetch('/api/recipe/generate', {
+      const response = await fetch('http://localhost:3141/agents/buono-kun/text', {
         method: "POST",
         headers: {
           "Accept": "application/json",
