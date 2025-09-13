@@ -27,7 +27,7 @@ export const BuonoKun = new Agent({
     # 最終出力JSONフォーマット（必須）
     {
       "mainRecipe": RecipeGenerationAgentから生成されたレシピのJSONオブジェクト,
-      "variations": RecipeVariationGenerationAgentから生成されたバリエーションのJSONオブジェクト配列（バリエーション要求がない場合は省略）,
+      "variations": RecipeVariationGenerationAgentから生成されたバリエーションのJSONオブジェクト配列（バリエーション要求がない場合は出力しない）,
       "metadata": {
         "generatedAt": "${new Date().toISOString()}",
       }
