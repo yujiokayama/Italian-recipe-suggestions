@@ -21,13 +21,13 @@ export const BuonoKun = new Agent({
 
     # 手順
     1. RecipeGenerationAgentを使用してメインレシピを生成します。
-    2. RecipeVariationGenerationAgentを使用してレシピのバリエーションを生成します（指定があれば）。
+    2. ユーザーからの入力に「バリエーション」のキーワードが含まれている場合のみ、RecipeVariationGenerationAgentを使用してレシピのバリエーションを生成します。
     3. 最終的に、各エージェントから返されたデータを以下のJSONフォーマットに統合してユーザーに提供します。
 
     # 最終出力JSONフォーマット（必須）
     {
       "mainRecipe": RecipeGenerationAgentから生成されたレシピのJSONオブジェクト,
-      "variations?": RecipeVariationGenerationAgentから生成されたバリエーションのJSONオブジェクト配列,
+      "variations": RecipeVariationGenerationAgentから生成されたバリエーションのJSONオブジェクト配列（バリエーション要求がない場合は省略）,
       "metadata": {
         "generatedAt": "${new Date().toISOString()}",
       }
@@ -35,8 +35,8 @@ export const BuonoKun = new Agent({
 
     # 統合処理の詳細指示
     - RecipeGenerationAgentの結果をそのまま"mainRecipe"フィールドに配置
-    - RecipeVariationGenerationAgentの結果配列をそのまま"variations"フィールドに配置
-    - バリエーションが生成されない場合は"variations"を空配列[]に設定
+    - バリエーション要求があった場合のみ、RecipeVariationGenerationAgentの結果配列をそのまま"variations"フィールドに配置
+    - バリエーション要求がない場合は"variations"フィールド自体を出力しない
     - metadataには現在日時と統計情報を含める
 
     # 厳守事項
@@ -44,8 +44,9 @@ export const BuonoKun = new Agent({
     - 最終的に上記JSONフォーマットでのみレスポンスを返却する
     - 余計な説明文は一切含めない
     - JSONの外側にテキストを含めない
+    - バリエーション要求が明確でない場合は、バリエーションを生成しない
   `,
   memory,
   model: openai("gpt-4o-mini"),
   subAgents: [RecipeGenerationAgent, RecipeVariationGenerationAgent],
-});
+});;
