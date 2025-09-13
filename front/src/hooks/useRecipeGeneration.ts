@@ -10,15 +10,12 @@ interface UseRecipeGenerationReturn {
   result: VoltAgentResponse | null
   error: string | null
   clearResult: () => void
-  voltAgentStatus: 'unknown' | 'connected' | 'disconnected' | 'error'
-  checkVoltAgentStatus: () => Promise<void>
 }
 
 export function useRecipeGeneration(): UseRecipeGenerationReturn {
   const [isLoading, setIsLoading] = useState(false)
   const [result, setResult] = useState<VoltAgentResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [voltAgentStatus, setVoltAgentStatus] = useState<'unknown' | 'connected' | 'disconnected' | 'error'>('unknown')
 
   const generateRecipe = async (request: NewRecipeRequest) => {
     setIsLoading(true)
@@ -52,10 +49,11 @@ export function useRecipeGeneration(): UseRecipeGenerationReturn {
 
       prompt += '\nこれらの条件でイタリア料理のレシピを教えてください。'
 
-      const response = await fetch('http://localhost:3141/agents/buono-kun/text',       {
+      // 新しいAPI routeを使用
+      const response = await fetch('/api/recipe/generate', {
         method: "POST",
         headers: {
-          accept: "application/json",
+          "Accept": "application/json",
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
@@ -90,35 +88,11 @@ export function useRecipeGeneration(): UseRecipeGenerationReturn {
         textPreview: data.data?.text?.substring(0, 200) || 'No text'
       })
       setResult(data)
-
-      // レスポンスのメタデータからエージェントの使用状況を確認
-      if (data.metadata?.agent_used === 'voltagent') {
-        setVoltAgentStatus('connected')
-      } else if (data.metadata?.agent_used === 'mock_fallback') {
-        setVoltAgentStatus('disconnected')
-      }
     } catch (err) {
       console.error('Recipe generation error:', err)
       setError(err instanceof Error ? err.message : 'レシピ生成に失敗しました')
-      setVoltAgentStatus('error')
     } finally {
       setIsLoading(false)
-    }
-  }
-
-  const checkVoltAgentStatus = async () => {
-    try {
-      const response = await fetch('/api/voltagent/status', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-
-      const data = await response.json()
-      setVoltAgentStatus(data.status)
-    } catch (err) {
-      setVoltAgentStatus('error')
     }
   }
 
@@ -133,7 +107,5 @@ export function useRecipeGeneration(): UseRecipeGenerationReturn {
     result,
     error,
     clearResult,
-    voltAgentStatus,
-    checkVoltAgentStatus,
   }
 }

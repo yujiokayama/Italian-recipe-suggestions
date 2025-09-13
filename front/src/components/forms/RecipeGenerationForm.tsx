@@ -29,10 +29,10 @@ export function RecipeGenerationForm({
   );
   const [cookingTime, setCookingTime] = useState<number>(30);
   const [servings, setServings] = useState<number>(2);
-  const [includeVariations, setIncludeVariations] = useState<boolean>(true);
+  const [includeVariations, setIncludeVariations] = useState<boolean>(false);
   const [requestedVariations, setRequestedVariations] = useState<
     RecipeVariationType[]
-  >(["vegetarian"]);
+  >([]);
   const [showSteamAnimation, setShowSteamAnimation] = useState<boolean>(false);
   const [justGenerated, setJustGenerated] = useState<boolean>(false);
 
@@ -42,8 +42,6 @@ export function RecipeGenerationForm({
     result,
     error,
     clearResult,
-    voltAgentStatus,
-    checkVoltAgentStatus,
   } = useRecipeGeneration();
 
   const handleIngredientChange = (index: number, value: string) => {
