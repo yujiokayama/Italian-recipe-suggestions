@@ -7,21 +7,22 @@ import { RecipeGenerationForm } from '@/components/forms/RecipeGenerationForm'
 
 export default function HomePage() {
   const [showForm, setShowForm] = useState(false)
-  const [hasRecipe, setHasRecipe] = useState(false)
+  const [_, setHasRecipe] = useState(false)
   return (
     <main className="min-h-screen">
       {/* 共通ヘッダー */}
       <header className="container mx-auto px-4 pt-10 pb-4">
         <div className="text-center">
-          <h1 
-            className="md:text-5xl font-bold text-gray-900 mb-4 cursor-pointer"
-            onClick={() => {
-              setShowForm(false)
-              setHasRecipe(false)
-            }}
-          >
-            <span className='text-sm'>イタリア料理レシピ提案</span>
-            <span className="block text-italian-red">Buono<span className="text-base">くん</span></span>
+          <h1 className="md:text-5xl font-bold text-gray-900 mb-4">
+            <span 
+              className="inline-block text-italian-red cursor-pointer"
+              onClick={() => {
+                setShowForm(false)
+                setHasRecipe(false)
+              }}
+            >
+              Buono<span className="text-base">くん</span>
+            </span>
           </h1>
         </div>
       </header>

@@ -514,7 +514,7 @@ export function RecipeGenerationForm({
             {/* エラーメッセージの表示 */}
             {errorMessage && (
               <p className="text-red-700 mb-4 bg-white rounded p-3 border border-red-100 text-sm">
-                "{errorMessage}"
+                {errorMessage}
               </p>
             )}
             
