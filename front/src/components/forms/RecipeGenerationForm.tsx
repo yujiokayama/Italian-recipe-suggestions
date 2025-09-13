@@ -481,10 +481,10 @@ export function RecipeGenerationForm({
       <div className="max-w-2xl mx-auto p-6">
         <div className="text-center">
           <Image
-            src="/images/buono-kun.png"
+            src="/images/buono-kun-error.png"
             alt="困ったBuonoくん"
-            width={300}
-            height={300}
+            width={400}
+            height={400}
             className="mx-auto mb-6"
           />
           <div className="bg-red-50 border border-red-200 rounded-lg p-6">
