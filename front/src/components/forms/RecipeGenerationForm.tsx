@@ -111,9 +111,185 @@ export function RecipeGenerationForm({
     await generateRecipe(request);
   };
 
+  // 食材以外の不適切な入力を検出する関数
+  const isInvalidIngredientError = (): boolean => {
+    if (!result) return false;
+
+    try {
+      let textContent = result.data?.text;
+
+      // または result.data.provider.steps の最後のステップから抽出
+      if (!textContent) {
+        const steps = result.data?.provider?.steps;
+        if (steps && steps.length > 0) {
+          const lastStep = steps[steps.length - 1];
+          const content = lastStep?.content;
+          if (content && content.length > 0) {
+            textContent = content[content.length - 1]?.text || textContent;
+          }
+        }
+      }
+
+      if (!textContent) return false;
+
+      // 食材として使用できない旨のメッセージを検出（複数食材の場合も含む）
+      const invalidMessages = [
+        "食材として使用できません",
+        "食材ではありません", 
+        "別の食材を指定",
+        "食材を指定してください",
+        "食材として適切ではありません",
+        "申し訳ありませんが",
+        "料理に使用できません",
+        "食べ物ではありません",
+        "食材として認識できません",
+        "レシピを生成することができません",
+        "具体的な食材を教えていただけますか",
+        "別の具体的な食材",
+        "適切な食材ではありません",
+        "食材として利用できません",
+        "料理に使用することはできません"
+      ];
+
+      const lowerTextContent = textContent.toLowerCase();
+      return invalidMessages.some(message => 
+        lowerTextContent.includes(message.toLowerCase())
+      );
+    } catch (error) {
+      console.error("Error checking for invalid ingredient:", error);
+      return false;
+    }
+  };
+
+  // レスポンスからエラーメッセージを取得する関数
+  const getErrorMessage = (): string | null => {
+    if (!result) return null;
+
+    try {
+      let textContent = result.data?.text;
+
+      // または result.data.provider.steps の最後のステップから抽出
+      if (!textContent) {
+        const steps = result.data?.provider?.steps;
+        if (steps && steps.length > 0) {
+          const lastStep = steps[steps.length - 1];
+          const content = lastStep?.content;
+          if (content && content.length > 0) {
+            textContent = content[content.length - 1]?.text || textContent;
+          }
+        }
+      }
+
+      if (!textContent) return null;
+
+      // JSONが含まれていない場合は、レスポンス全体をエラーメッセージとして扱う
+      if (!textContent.includes('{') && textContent.length < 500) {
+        return textContent.trim();
+      }
+
+      return null;
+    } catch (error) {
+      console.error("Error extracting error message:", error);
+      return null;
+    }
+  };
+
+  // 不適切な食材を抽出する関数
+  const getInvalidIngredients = (): string[] => {
+    if (!result) return [];
+
+    try {
+      let textContent = result.data?.text;
+
+      // または result.data.provider.steps の最後のステップから抽出
+      if (!textContent) {
+        const steps = result.data?.provider?.steps;
+        if (steps && steps.length > 0) {
+          const lastStep = steps[steps.length - 1];
+          const content = lastStep?.content;
+          if (content && content.length > 0) {
+            textContent = content[content.length - 1]?.text || textContent;
+          }
+        }
+      }
+
+      if (!textContent) return [];
+
+      const invalidIngredients: string[] = [];
+
+      // 複数食材のパターンを検索
+      const multiplePatterns = [
+        /食材「([^」]+)」と「([^」]+)」/,
+        /指定された食材「([^」]+)」と「([^」]+)」/,
+        /「([^」]+)」と「([^」]+)」では/,
+        /「([^」]+)」.*?「([^」]+)」/,
+      ];
+
+      // 各パターンでマッチングを試行
+      for (const pattern of multiplePatterns) {
+        const match = textContent.match(pattern);
+        if (match && match[1] && match[2]) {
+          invalidIngredients.push(match[1]);
+          invalidIngredients.push(match[2]);
+          break; // 最初にマッチしたパターンを使用
+        }
+      }
+
+      // 単一食材のパターン（複数が見つからなかった場合）
+      if (invalidIngredients.length === 0) {
+        const singlePatterns = [
+          /食材「([^」]+)」/,
+          /指定された食材「([^」]+)」/,
+          /「([^」]+)」.*?食材/,
+        ];
+
+        for (const pattern of singlePatterns) {
+          const match = textContent.match(pattern);
+          if (match && match[1]) {
+            invalidIngredients.push(match[1]);
+            break;
+          }
+        }
+      }
+
+      // 一般的な「」囲みのパターン（他がない場合）
+      if (invalidIngredients.length === 0) {
+        const quotedMatches = textContent.match(/「([^」]+)」/g);
+        if (quotedMatches) {
+          quotedMatches.forEach(match => {
+            const ingredient = match.replace(/[「」]/g, '');
+            // 適切な長さで、一般的でない文字列のみを対象とする
+            if (ingredient.length > 0 && ingredient.length < 20 && 
+                !ingredient.includes('レシピ') && !ingredient.includes('料理')) {
+              invalidIngredients.push(ingredient);
+            }
+          });
+        }
+      }
+
+      // 重複を除去（ES5互換）
+      const uniqueIngredients: string[] = [];
+      invalidIngredients.forEach(ingredient => {
+        if (uniqueIngredients.indexOf(ingredient) === -1) {
+          uniqueIngredients.push(ingredient);
+        }
+      });
+
+      return uniqueIngredients;
+    } catch (error) {
+      console.error("Error extracting invalid ingredients:", error);
+      return [];
+    }
+  };
+
   // レスポンスからレシピデータを抽出する関数
   const getRecipeData = (): APIVariationResponse | RecipeResponse | null => {
     if (!result) return null;
+
+    // 食材以外の不適切な入力の場合はnullを返す
+    if (isInvalidIngredientError()) {
+      return null;
+    }
 
     try {
       console.log("Processing result:", result);
@@ -233,7 +409,12 @@ export function RecipeGenerationForm({
   // レシピ生成状態を親コンポーネントに通知 & 湯気アニメーション制御
   useEffect(() => {
     if (onRecipeGenerated) {
-      onRecipeGenerated(!!displayRecipe);
+      // エラー状態の場合はfalseを通知
+      if (error || (result && isInvalidIngredientError())) {
+        onRecipeGenerated(false);
+      } else {
+        onRecipeGenerated(!!displayRecipe);
+      }
     }
 
     // レシピが新しく生成された時に湯気アニメーションを表示
@@ -241,7 +422,7 @@ export function RecipeGenerationForm({
       setShowSteamAnimation(true);
       setJustGenerated(true);
     }
-  }, [displayRecipe, onRecipeGenerated, justGenerated]);
+  }, [displayRecipe, onRecipeGenerated, justGenerated, error, result]);
 
   // 湯気アニメーション完了時の処理
   const handleSteamAnimationComplete = () => {
@@ -253,6 +434,8 @@ export function RecipeGenerationForm({
     clearResult();
     setJustGenerated(false);
     setShowSteamAnimation(false);
+    // 食材入力をリセットし、フォーカスを戻す
+    setIngredients([""]);
     if (onRecipeGenerated) {
       onRecipeGenerated(false);
     }
@@ -284,6 +467,108 @@ export function RecipeGenerationForm({
               ></div>
             </div>
           </h2>
+        </div>
+      </div>
+    );
+  }
+
+  // 食材以外の不適切な入力エラーの表示
+  if (result && isInvalidIngredientError()) {
+    const errorMessage = getErrorMessage();
+    const invalidIngredients = getInvalidIngredients();
+    
+    return (
+      <div className="max-w-2xl mx-auto p-6">
+        <div className="text-center">
+          <Image
+            src="/images/buono-kun.png"
+            alt="困ったBuonoくん"
+            width={300}
+            height={300}
+            className="mx-auto mb-6"
+          />
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+            <h2 className="text-2xl font-bold text-red-800 mb-4">
+              適切な食材を入力してください
+            </h2>
+            
+            {/* 不適切な食材の表示 */}
+            {invalidIngredients.length > 0 && (
+              <div className="mb-4 p-3 bg-red-100 rounded border border-red-200">
+                <p className="text-red-800 font-medium mb-2">
+                  以下は料理の食材として使用できません：
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {invalidIngredients.map((ingredient, index) => (
+                    <span 
+                      key={index}
+                      className="inline-block px-3 py-1 bg-red-200 text-red-800 rounded-full text-sm font-medium"
+                    >
+                      {ingredient}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* エラーメッセージの表示 */}
+            {errorMessage && (
+              <p className="text-red-700 mb-4 bg-white rounded p-3 border border-red-100 text-sm">
+                "{errorMessage}"
+              </p>
+            )}
+            
+            <p className="text-red-700 mb-4">
+              トマト、パスタ、チーズなどの料理に使える食材を入力してください。
+            </p>
+            
+            <div className="space-y-2 mb-6">
+              <p className="text-sm text-red-600">
+                <strong>食材の例：</strong>
+              </p>
+              <p className="text-sm text-red-600">
+                ✓ トマト、玉ねぎ、にんにく、オリーブオイル
+              </p>
+              <p className="text-sm text-red-600">
+                ✓ パスタ、ベーコン、チーズ、卵
+              </p>
+              <p className="text-sm text-red-600">
+                ✓ 鶏肉、ズッキーニ、バジル、モッツァレラチーズ
+              </p>
+            </div>
+            
+            <Button onClick={handleNewRecipe} className="bg-italian-red hover:bg-red-700">
+              食材を入力し直す
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 通常のエラー（ネットワークエラーなど）の表示
+  if (error) {
+    return (
+      <div className="max-w-2xl mx-auto p-6">
+        <div className="text-center">
+          <Image
+            src="/images/buono-kun-error.png"
+            alt="困ったBuonoくん"
+            width={300}
+            height={300}
+            className="mx-auto mb-6"
+          />
+          <div className="bg-orange-50 border border-orange-200 rounded-lg p-6">
+            <h2 className="text-2xl font-bold text-orange-800 mb-4">
+              エラーが発生しました
+            </h2>
+            <p className="text-orange-700 mb-4">
+              {error}
+            </p>
+            <Button onClick={handleNewRecipe} className="bg-italian-red hover:bg-red-700">
+              もう一度試す
+            </Button>
+          </div>
         </div>
       </div>
     );
